@@ -1,4 +1,4 @@
-[gd_scene load_steps=3 format=3]
+[gd_scene load_steps=4 format=3]
 
 [ext_resource type="Script" path="res://scripts/game_hud.gd" id="1_hud"]
 
@@ -13,6 +13,18 @@ corner_radius_top_left = 8
 corner_radius_top_right = 8
 corner_radius_bottom_right = 8
 corner_radius_bottom_left = 8
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_victory"]
+bg_color = Color(0.118, 0.173, 0.216, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.957, 0.827, 0.369, 1)
+corner_radius_top_left = 12
+corner_radius_top_right = 12
+corner_radius_bottom_right = 12
+corner_radius_bottom_left = 12
 
 [node name="HUD" type="CanvasLayer"]
 script = ExtResource("1_hud")
@@ -100,3 +112,92 @@ autowrap_mode = 3
 custom_minimum_size = Vector2(0, 38)
 focus_mode = 0
 text = "Resetuj poziom"
+
+[node name="VictoryOverlay" type="Control" parent="."]
+visible = false
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 0
+
+[node name="Dim" type="ColorRect" parent="VictoryOverlay"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.035, 0.067, 0.098, 0.78)
+
+[node name="Center" type="CenterContainer" parent="VictoryOverlay"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="VictoryPanel" type="PanelContainer" parent="VictoryOverlay/Center"]
+custom_minimum_size = Vector2(420, 320)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_victory")
+
+[node name="Margin" type="MarginContainer" parent="VictoryOverlay/Center/VictoryPanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 28
+theme_override_constants/margin_top = 24
+theme_override_constants/margin_right = 28
+theme_override_constants/margin_bottom = 24
+
+[node name="Content" type="VBoxContainer" parent="VictoryOverlay/Center/VictoryPanel/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="Decoration" type="Label" parent="VictoryOverlay/Center/VictoryPanel/Margin/Content"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.957, 0.827, 0.369, 1)
+theme_override_font_sizes/font_size = 42
+text = "★"
+horizontal_alignment = 1
+
+[node name="VictoryTitle" type="Label" parent="VictoryOverlay/Center/VictoryPanel/Margin/Content"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.941, 0.957, 0.973, 1)
+theme_override_font_sizes/font_size = 25
+text = "POZIOM UKOŃCZONY!"
+horizontal_alignment = 1
+
+[node name="MovesValue" type="Label" parent="VictoryOverlay/Center/VictoryPanel/Margin/Content"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.663, 0.729, 0.784, 1)
+theme_override_font_sizes/font_size = 18
+text = "Ruchy: 0"
+horizontal_alignment = 1
+
+[node name="EnergyValue" type="Label" parent="VictoryOverlay/Center/VictoryPanel/Margin/Content"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.663, 0.729, 0.784, 1)
+theme_override_font_sizes/font_size = 18
+text = "Energia: 0.0 J"
+horizontal_alignment = 1
+
+[node name="Buttons" type="HBoxContainer" parent="VictoryOverlay/Center/VictoryPanel/Margin/Content"]
+layout_mode = 2
+size_flags_vertical = 3
+alignment = 1
+theme_override_constants/separation = 12
+
+[node name="ReplayButton" type="Button" parent="VictoryOverlay/Center/VictoryPanel/Margin/Content/Buttons"]
+custom_minimum_size = Vector2(160, 40)
+layout_mode = 2
+focus_mode = 0
+text = "Zagraj ponownie"
+
+[node name="CloseButton" type="Button" parent="VictoryOverlay/Center/VictoryPanel/Margin/Content/Buttons"]
+custom_minimum_size = Vector2(120, 40)
+layout_mode = 2
+focus_mode = 0
+text = "Zamknij"

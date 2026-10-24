@@ -34,6 +34,7 @@ func _ready() -> void:
 
 func _load_level() -> void:
 	_cancel_animations()
+	hud.hide_victory()
 	level = LevelData.from_file(LEVEL_PATHS[selected_level_index])
 	physics = PhysicalModel.new(level.robot_force)
 	player_position = level.player_start
@@ -164,6 +165,7 @@ func _finish_animation() -> void:
 		is_completed = true
 		status = "Poziom ukończony!"
 		_update_hud()
+		hud.show_victory(moves, energy)
 	queue_redraw()
 
 func _is_level_solved() -> bool:
