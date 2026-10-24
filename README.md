@@ -7,7 +7,7 @@ Projekt gry Sokoban 2D w Godot Engine 4.7.2 (GDScript). Obecna wersja pozwala r�
 1. Otwórz katalog repozytorium jako projekt w Godot 4.7.2 (`project.godot`).
 2. Uruchom projekt klawiszem `F5`. Sceną główną jest `main.tscn`.
 
-Do samej gry nie są potrzebne zewnętrzne grafiki: plansza, gracz i skrzynie są rysowane programowo. Repozytorium zawiera też dodatek `addons/godot_ai`, włączony w konfiguracji edytora do integracji z Codex przez MCP.
+Do samej gry nie są potrzebne zewnętrzne grafiki: plansza, gracz i skrzynie są rysowane programowo.
 
 ## Sterowanie i interfejs
 
