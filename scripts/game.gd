@@ -91,37 +91,23 @@ func _unhandled_key_input(event: InputEvent) -> void:
 func _try_move(direction: Vector2i) -> void:
 	if is_completed or is_animating:
 		return
-	var next_position := player_position + direction
-	var box_index := _box_at(next_position)
-	if box_index == -1:
-		if level.is_walkable(next_position):
-			player_position = next_position
-			moves += 1
-			status = "Ruch wykonany."
-			_animate_player()
-		else:
-			status = "Sciana blokuje przejscie."
-	else:
-		var occupied := _box_positions()
-		var box: Dictionary = boxes[box_index]
-		occupied.erase(next_position)
-		var result := physics.push_box(
-			next_position,
-			direction,
-			float(box["mass"]),
-			level,
-			occupied
-		)
-		if bool(result["success"]):
-			boxes[box_index]["position"] = result["position"]
-			player_position = next_position
-			moves += 1
-			energy += float(result["energy"])
+	var result := physics.move(BoardState.new(player_position, boxes), direction, level)
+	if bool(result["success"]):
+		var next_state: BoardState = result["state"]
+		player_position = next_state.player_position
+		boxes = next_state.boxes
+		moves += 1
+		energy += float(result["energy"])
+		var box_index: int = result["box_index"]
+		if box_index >= 0:
 			status = "Pchnieto skrzynie po podlozu: %s." % result["terrain"]
 			pending_victory = _is_level_solved()
 			_animate_push(box_index, result["path"])
 		else:
-			status = str(result["reason"])
+			status = "Ruch wykonany."
+			_animate_player()
+	else:
+		status = str(result["reason"])
 	_update_hud()
 	queue_redraw()
 
