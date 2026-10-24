@@ -1,6 +1,9 @@
-[gd_scene load_steps=2 format=3 uid="uid://tkhg0d36if2o"]
+[gd_scene load_steps=3 format=3 uid="uid://tkhg0d36if2o"]
 
-[ext_resource type="Script" path="res://scripts/game.gd" id="1_game"]
+[ext_resource type="Script" uid="uid://o7s1eefsaj1p" path="res://scripts/game.gd" id="1_game"]
+[ext_resource type="PackedScene" path="res://hud.tscn" id="2_hud"]
 
 [node name="Sokoban" type="Node2D" unique_id=2061918856]
 script = ExtResource("1_game")
+
+[node name="HUD" parent="." instance=ExtResource("2_hud")]
