@@ -24,7 +24,7 @@ anchor_right = 1.0
 offset_left = -240.0
 offset_top = 76.0
 offset_right = -16.0
-offset_bottom = 426.0
+offset_bottom = 520.0
 theme_override_styles/panel = SubResource("StyleBoxFlat_panel")
 
 [node name="Margin" type="MarginContainer" parent="Panel"]
@@ -40,6 +40,14 @@ theme_override_constants/separation = 12
 theme_override_colors/font_color = Color(0.941, 0.957, 0.973, 1)
 theme_override_font_sizes/font_size = 20
 text = "STATYSTYKI"
+
+[node name="LevelHeading" type="Label" parent="Panel/Margin/Content"]
+theme_override_colors/font_color = Color(0.663, 0.729, 0.784, 1)
+text = "Poziom"
+
+[node name="LevelSelector" type="OptionButton" parent="Panel/Margin/Content"]
+custom_minimum_size = Vector2(0, 34)
+focus_mode = 0
 
 [node name="MovesRow" type="HBoxContainer" parent="Panel/Margin/Content"]
 

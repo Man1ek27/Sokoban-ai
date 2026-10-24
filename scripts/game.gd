@@ -2,7 +2,10 @@ extends Node2D
 
 const TILE_SIZE := 56.0
 const BOARD_ORIGIN := Vector2(28.0, 76.0)
-const LEVEL_PATH := "res://levels/demo_level.json"
+const LEVEL_PATHS := [
+	"res://levels/demo_level.json",
+	"res://levels/win_test.json"
+]
 
 @onready var hud: GameHud = $HUD
 
@@ -13,21 +16,31 @@ var boxes: Array[Dictionary] = []
 var moves := 0
 var energy := 0.0
 var status := "Poruszaj sie strzalkami lub WASD."
+var selected_level_index := 0
+var is_completed := false
 
 func _ready() -> void:
 	hud.reset_requested.connect(_reset_level)
+	hud.level_selected.connect(_select_level)
 	_load_level()
 	queue_redraw()
 
 func _load_level() -> void:
-	level = LevelData.from_file(LEVEL_PATH)
+	level = LevelData.from_file(LEVEL_PATHS[selected_level_index])
 	physics = PhysicalModel.new(level.robot_force)
 	player_position = level.player_start
 	boxes = level.boxes.duplicate(true)
 	moves = 0
 	energy = 0.0
 	status = "Poruszaj sie strzalkami lub WASD."
+	is_completed = false
 	_update_hud()
+
+func _select_level(index: int) -> void:
+	if index < 0 or index >= LEVEL_PATHS.size():
+		return
+	selected_level_index = index
+	_reset_level()
 
 func _reset_level() -> void:
 	_load_level()
@@ -56,6 +69,8 @@ func _unhandled_key_input(event: InputEvent) -> void:
 		_try_move(direction)
 
 func _try_move(direction: Vector2i) -> void:
+	if is_completed:
+		return
 	var next_position := player_position + direction
 	var box_index := _box_at(next_position)
 	if box_index == -1:
@@ -82,10 +97,21 @@ func _try_move(direction: Vector2i) -> void:
 			moves += 1
 			energy += float(result["energy"])
 			status = "Pchnieto skrzynie po podlozu: %s." % result["terrain"]
+			if _is_level_solved():
+				is_completed = true
+				status = "Poziom ukończony!"
 		else:
 			status = str(result["reason"])
 	_update_hud()
 	queue_redraw()
+
+func _is_level_solved() -> bool:
+	if boxes.is_empty() or level.goals.is_empty() or boxes.size() != level.goals.size():
+		return false
+	for box in boxes:
+		if not level.goals.has(box["position"]):
+			return false
+	return true
 
 func _box_positions() -> Dictionary:
 	var positions := {}
