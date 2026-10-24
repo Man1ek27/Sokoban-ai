@@ -4,6 +4,8 @@ const TILE_SIZE := 56.0
 const BOARD_ORIGIN := Vector2(28.0, 76.0)
 const LEVEL_PATH := "res://levels/demo_level.json"
 
+@onready var hud: GameHud = $HUD
+
 var level: LevelData
 var physics: PhysicalModel
 var player_position := Vector2i.ZERO
@@ -13,6 +15,7 @@ var energy := 0.0
 var status := "Poruszaj sie strzalkami lub WASD."
 
 func _ready() -> void:
+	hud.reset_requested.connect(_reset_level)
 	_load_level()
 	queue_redraw()
 
@@ -24,6 +27,14 @@ func _load_level() -> void:
 	moves = 0
 	energy = 0.0
 	status = "Poruszaj sie strzalkami lub WASD."
+	_update_hud()
+
+func _reset_level() -> void:
+	_load_level()
+	queue_redraw()
+
+func _update_hud() -> void:
+	hud.update_state(moves, energy, physics.robot_force, status)
 
 func _unhandled_key_input(event: InputEvent) -> void:
 	if not event.pressed or event.echo:
@@ -39,8 +50,7 @@ func _unhandled_key_input(event: InputEvent) -> void:
 		KEY_RIGHT, KEY_D:
 			direction = Vector2i.RIGHT
 		KEY_R:
-			_load_level()
-			queue_redraw()
+			_reset_level()
 			return
 	if direction != Vector2i.ZERO:
 		_try_move(direction)
@@ -74,6 +84,7 @@ func _try_move(direction: Vector2i) -> void:
 			status = "Pchnieto skrzynie po podlozu: %s." % result["terrain"]
 		else:
 			status = str(result["reason"])
+	_update_hud()
 	queue_redraw()
 
 func _box_positions() -> Dictionary:
@@ -101,10 +112,6 @@ func _draw() -> void:
 	for box in boxes:
 		_draw_box(box["position"], float(box["mass"]))
 	_draw_player(player_position)
-
-	var info_position := Vector2(28, BOARD_ORIGIN.y + level.tiles.size() * TILE_SIZE + 34)
-	draw_string(ThemeDB.fallback_font, info_position, status, HORIZONTAL_ALIGNMENT_LEFT, -1, 16, Color("#f0f4f8"))
-	draw_string(ThemeDB.fallback_font, info_position + Vector2(0, 25), "Ruchy: %d   Energia: %.1f J   Fmax: %.0f N" % [moves, energy, physics.robot_force], HORIZONTAL_ALIGNMENT_LEFT, -1, 15, Color("#a9bac8"))
 
 func _draw_tile(position: Vector2i) -> void:
 	var tile := level.tile_at(position)

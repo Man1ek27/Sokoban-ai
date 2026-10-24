@@ -1,0 +1,94 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/game_hud.gd" id="1_hud"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_panel"]
+bg_color = Color(0.118, 0.173, 0.216, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.204, 0.286, 0.369, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[node name="HUD" type="CanvasLayer"]
+script = ExtResource("1_hud")
+
+[node name="Panel" type="PanelContainer" parent="."]
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -240.0
+offset_top = 76.0
+offset_right = -16.0
+offset_bottom = 426.0
+theme_override_styles/panel = SubResource("StyleBoxFlat_panel")
+
+[node name="Margin" type="MarginContainer" parent="Panel"]
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 16
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 16
+
+[node name="Content" type="VBoxContainer" parent="Panel/Margin"]
+theme_override_constants/separation = 12
+
+[node name="Title" type="Label" parent="Panel/Margin/Content"]
+theme_override_colors/font_color = Color(0.941, 0.957, 0.973, 1)
+theme_override_font_sizes/font_size = 20
+text = "STATYSTYKI"
+
+[node name="MovesRow" type="HBoxContainer" parent="Panel/Margin/Content"]
+
+[node name="MovesLabel" type="Label" parent="Panel/Margin/Content/MovesRow"]
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.663, 0.729, 0.784, 1)
+text = "Ruchy"
+
+[node name="MovesValue" type="Label" parent="Panel/Margin/Content/MovesRow"]
+theme_override_colors/font_color = Color(0.941, 0.957, 0.973, 1)
+text = "0"
+horizontal_alignment = 2
+
+[node name="EnergyRow" type="HBoxContainer" parent="Panel/Margin/Content"]
+
+[node name="EnergyLabel" type="Label" parent="Panel/Margin/Content/EnergyRow"]
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.663, 0.729, 0.784, 1)
+text = "Energia"
+
+[node name="EnergyValue" type="Label" parent="Panel/Margin/Content/EnergyRow"]
+theme_override_colors/font_color = Color(0.941, 0.957, 0.973, 1)
+text = "0.0 J"
+horizontal_alignment = 2
+
+[node name="ForceRow" type="HBoxContainer" parent="Panel/Margin/Content"]
+
+[node name="ForceLabel" type="Label" parent="Panel/Margin/Content/ForceRow"]
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.663, 0.729, 0.784, 1)
+text = "Maks. sila"
+
+[node name="ForceValue" type="Label" parent="Panel/Margin/Content/ForceRow"]
+theme_override_colors/font_color = Color(0.941, 0.957, 0.973, 1)
+text = "300 N"
+horizontal_alignment = 2
+
+[node name="StatusHeading" type="Label" parent="Panel/Margin/Content"]
+theme_override_colors/font_color = Color(0.663, 0.729, 0.784, 1)
+text = "Ostatnie dzialanie"
+
+[node name="StatusValue" type="Label" parent="Panel/Margin/Content"]
+custom_minimum_size = Vector2(0, 72)
+size_flags_vertical = 3
+theme_override_colors/font_color = Color(0.941, 0.957, 0.973, 1)
+text = "Poruszaj sie strzalkami lub WASD."
+autowrap_mode = 3
+
+[node name="ResetButton" type="Button" parent="Panel/Margin/Content"]
+custom_minimum_size = Vector2(0, 38)
+focus_mode = 0
+text = "Resetuj poziom"
