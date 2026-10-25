@@ -1,6 +1,6 @@
 # Sokoban AI
 
-Projekt gry Sokoban 2D w Godot Engine 4.7.2 (GDScript). Obecna wersja pozwala ręcznie grać na planszach z fizyką pchania skrzyń. Zawiera również niezależny solver A* z heurystyką Manhattan, minimalizacją liczby ruchów lub energii oraz uruchamianiem bez okna gry. Podłączenie solvera do HUD i porównanie kolejnych heurystyk pozostają do zrobienia.
+Projekt gry Sokoban 2D w Godot Engine 4.7.2 (GDScript). Można grać ręcznie albo uruchomić z HUD solver A*, który wybiera plan o najmniejszej liczbie ruchów lub najniższym koszcie energii. Gra i solver korzystają z tego samego modelu pchania, tarcia i poślizgu. Planer można też uruchomić bez okna gry. Dodatkowe heurystyki, wykrywanie deadlocków i eksperymenty porównawcze pozostają do zrobienia.
 
 ## Uruchomienie
 
@@ -16,8 +16,15 @@ Do samej gry nie są potrzebne zewnętrzne grafiki: plansza, gracz i skrzynie s�
 | `WASD` lub strzałki | Ruch gracza i pchanie skrzyni |
 | `R` lub **Resetuj poziom** | Ponowne wczytanie bieżącego poziomu |
 | **Poziom** | Wybór demonstracji fizyki albo testu zwycięstwa |
+| **Najmniej ruchów** / **Najmniej energii** | Wybór kosztu planowania A*: `STEPS` / `ENERGY` |
+| **Rozwiąż AI** | Wyznaczenie planu od aktualnego stanu planszy i rozpoczęcie odtwarzania |
+| **Zatrzymaj AI** | Zatrzymanie kolejnych akcji planu; trwająca animacja kończy się bez przerywania |
 
 HUD pokazuje liczbę wykonanych ruchów, zużytą energię, maksymalną siłę robota i komunikat o ostatnim działaniu. Ruch gracza i skrzyni jest animowany; poślizg skrzyni przebiega przez kolejne pola wyznaczone przez model fizyczny. Podczas animacji i po ukończeniu poziomu kolejne ruchy są blokowane.
+
+Sekcja AI pokazuje status i statystyki ostatniego wyszukiwania: tryb kosztu, czas w ms, liczbę rozwiniętych i odkrytych stanów, długość planu oraz jego energię. Po znalezieniu rozwiązania każda akcja planu przechodzi przez tę samą funkcję ruchu i model fizyczny co ruch ręczny; następna akcja rozpoczyna się dopiero po zakończeniu animacji. Nieudany ruch AI przerywa odtwarzanie i wyświetla jego powód. Podczas odtwarzania `WASD` i strzałki są ignorowane, ale `R` nadal resetuje poziom. Reset i zmiana poziomu usuwają plan oraz statystyki AI; zatrzymanie odtwarzania zachowuje statystyki ostatniego wyszukiwania.
+
+Wyszukiwanie jest synchroniczne: napis „Planowanie...” może pojawić się przed wywołaniem solvera, lecz okno gry nie reaguje podczas samego obliczania planu. Gra przekazuje limit 100 000 rozwiniętych stanów i 30 000 ms. Osiągnięcie limitu czasu lub stanów oznacza, że nie ustalono rozwiązywalności planszy, a nie że rozwiązanie nie istnieje.
 
 Po umieszczeniu wszystkich skrzyń na celach pojawia się ekran ukończenia z liczbą ruchów i energią. Można zagrać ponownie albo zamknąć komunikat. Zamknięcie komunikatu nie odblokowuje ruchu na ukończonym poziomie; można go zresetować lub wybrać inny.
 
@@ -98,9 +105,10 @@ słownik zgodny z `PhysicalModel.push_box()`. `is_solved(level)` sprawdza cel.
 
 ### Algorytm A*
 
-Kontrakt wejścia/wyjścia, statusy i zasady integracji dla Alicji opisuje
-[docs/ai_interface.md](docs/ai_interface.md). Planer można uruchomić bez
-okna gry przez `scripts/solve_cli.gd`; komenda jest podana w tym dokumencie.
+Kontrakt wejścia/wyjścia i statusy opisuje
+[docs/ai_interface.md](docs/ai_interface.md). Gra wywołuje solver ze stanem
+`BoardState.new(player_position, boxes)`, czyli z aktualnego układu planszy,
+bez jej resetowania. Solver nie zmienia stanu gry podczas wyszukiwania.
 
 `scripts/astar_solver.gd` udostępnia synchroniczne wyszukiwanie bez zależności
 od sceny. Kolejka priorytetowa w `scripts/min_priority_queue.gd` używa kopca
@@ -124,7 +132,7 @@ korzysta z kosztu każdego ruchu zwracanego przez `PhysicalModel.move()`.
 Tej samej funkcji używa rozgrywka, więc AI i animacje otrzymują ten sam
 stan końcowy po poślizgu. Heurystyka w trybie `ENERGY` jest wyrażona w dżulach.
 
-Przyjęta propozycja kosztów do uzgodnienia z Mariuszem (d = 1 m):
+Koszty zaimplementowane w `PhysicalModel` (d = 1 m):
 
 - Zwykły krok: `W_robot = m_robot * g * mu_k(pole startowe robota) * d`.
 - Pchnięcie: `W_robot + m_skrzyni * g * mu_k(pole startowe skrzyni) * d`.
@@ -178,17 +186,33 @@ Wynik zawiera `status`, `success`, `actions`, `moves`, `cost`, `energy`,
 oraz `invalid_heuristic`. Brak rozwiązania ma koszt `INF`.
 Domyślne limity to 100000 rozwinięć i 5000 ms (argumenty piąty i szósty).
 Osiągnięcie limitu nie oznacza, że plansza jest nierozwiązywalna.
-Wywołanie blokuje wątek do zakończenia; podłączenie planera do interfejsu
-i odtwarzanie planu pozostają kolejnym etapem.
+Wywołanie blokuje wątek do zakończenia. Gra przekazuje własny limit czasu
+30 000 ms, a CLI używa domyślnego limitu 5000 ms, o ile nie podano innego.
+
+### Uruchomienie solvera bez okna gry
+
+Z katalogu projektu (zastąp `godot` ścieżką do programu Godot, jeśli nie ma go w `PATH`):
+
+```text
+godot --headless --path . --script res://scripts/solve_cli.gd -- res://levels/win_test.json energy 100000 5000
+```
+
+Argumenty po `--` to: ścieżka do poziomu, opcjonalny tryb `steps` lub `energy`,
+limit rozwinięć i limit czasu w ms. Domyślne wartości to `steps`, `100000`
+i `5000`. Wynik jest wypisywany jako JSON (po ewentualnych komunikatach
+startowych Godota); akcje mają postać kierunków
+`[dx, dy]`. CLI zwraca kod `0` dla rozwiązania, `1` dla braku rozwiązania
+lub osiągnięcia limitu i `2` dla nieprawidłowego wejścia lub heurystyki.
+`demo_level.json` w trybie `energy` może wymagać większego limitu czasu,
+np. `30000` ms.
 
 ## Dalszy rozwój
 
-Obecna gra nie uruchamia solvera z HUD ani nie prezentuje statystyk planowania.
 Kolejne elementy, które można dodać do projektu:
 
 - heurystyki fizyczne dla A*,
 - wykrywanie deadlocków,
 - więcej plansz o rosnącej trudności,
 - panel parametrów fizycznych,
-- uruchamianie i zatrzymywanie autonomicznego agenta AI,
-- prezentacja statystyk planowania.
+- porównanie strategii AI i ustawień fizyki w eksperymentach,
+- planowanie asynchroniczne, aby okno gry pozostawało responsywne podczas wyszukiwania.
