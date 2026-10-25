@@ -1,6 +1,6 @@
-[gd_scene load_steps=4 format=3]
+[gd_scene format=3 uid="uid://bj7yj7275vmlo"]
 
-[ext_resource type="Script" path="res://scripts/game_hud.gd" id="1_hud"]
+[ext_resource type="Script" uid="uid://pbdlk1g8vcdj" path="res://scripts/game_hud.gd" id="1_hud"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_panel"]
 bg_color = Color(0.118, 0.173, 0.216, 1)
@@ -26,94 +26,165 @@ corner_radius_top_right = 12
 corner_radius_bottom_right = 12
 corner_radius_bottom_left = 12
 
-[node name="HUD" type="CanvasLayer"]
+[node name="HUD" type="CanvasLayer" unique_id=1058951037]
 script = ExtResource("1_hud")
 
-[node name="Panel" type="PanelContainer" parent="."]
+[node name="Panel" type="PanelContainer" parent="." unique_id=30153425]
 anchors_preset = 1
 anchor_left = 1.0
 anchor_right = 1.0
 offset_left = -240.0
 offset_top = 76.0
 offset_right = -16.0
-offset_bottom = 520.0
+offset_bottom = 664.0
 theme_override_styles/panel = SubResource("StyleBoxFlat_panel")
 
-[node name="Margin" type="MarginContainer" parent="Panel"]
+[node name="Margin" type="MarginContainer" parent="Panel" unique_id=57597299]
+layout_mode = 2
 theme_override_constants/margin_left = 16
 theme_override_constants/margin_top = 16
 theme_override_constants/margin_right = 16
 theme_override_constants/margin_bottom = 16
 
-[node name="Content" type="VBoxContainer" parent="Panel/Margin"]
-theme_override_constants/separation = 12
+[node name="Content" type="VBoxContainer" parent="Panel/Margin" unique_id=1524837954]
+layout_mode = 2
+theme_override_constants/separation = 6
 
-[node name="Title" type="Label" parent="Panel/Margin/Content"]
+[node name="Title" type="Label" parent="Panel/Margin/Content" unique_id=114600439]
+layout_mode = 2
 theme_override_colors/font_color = Color(0.941, 0.957, 0.973, 1)
 theme_override_font_sizes/font_size = 20
 text = "STATYSTYKI"
+horizontal_alignment = 1
 
-[node name="LevelHeading" type="Label" parent="Panel/Margin/Content"]
+[node name="LevelHeading" type="Label" parent="Panel/Margin/Content" unique_id=1688412834]
+layout_mode = 2
 theme_override_colors/font_color = Color(0.663, 0.729, 0.784, 1)
 text = "Poziom"
 
-[node name="LevelSelector" type="OptionButton" parent="Panel/Margin/Content"]
+[node name="LevelSelector" type="OptionButton" parent="Panel/Margin/Content" unique_id=952034328]
 custom_minimum_size = Vector2(0, 34)
+layout_mode = 2
 focus_mode = 0
 
-[node name="MovesRow" type="HBoxContainer" parent="Panel/Margin/Content"]
+[node name="MovesRow" type="HBoxContainer" parent="Panel/Margin/Content" unique_id=145203273]
+layout_mode = 2
 
-[node name="MovesLabel" type="Label" parent="Panel/Margin/Content/MovesRow"]
+[node name="MovesLabel" type="Label" parent="Panel/Margin/Content/MovesRow" unique_id=648773789]
+layout_mode = 2
 size_flags_horizontal = 3
 theme_override_colors/font_color = Color(0.663, 0.729, 0.784, 1)
 text = "Ruchy"
 
-[node name="MovesValue" type="Label" parent="Panel/Margin/Content/MovesRow"]
+[node name="MovesValue" type="Label" parent="Panel/Margin/Content/MovesRow" unique_id=823799004]
+layout_mode = 2
 theme_override_colors/font_color = Color(0.941, 0.957, 0.973, 1)
 text = "0"
 horizontal_alignment = 2
 
-[node name="EnergyRow" type="HBoxContainer" parent="Panel/Margin/Content"]
+[node name="EnergyRow" type="HBoxContainer" parent="Panel/Margin/Content" unique_id=142843762]
+layout_mode = 2
 
-[node name="EnergyLabel" type="Label" parent="Panel/Margin/Content/EnergyRow"]
+[node name="EnergyLabel" type="Label" parent="Panel/Margin/Content/EnergyRow" unique_id=686787414]
+layout_mode = 2
 size_flags_horizontal = 3
 theme_override_colors/font_color = Color(0.663, 0.729, 0.784, 1)
 text = "Energia"
 
-[node name="EnergyValue" type="Label" parent="Panel/Margin/Content/EnergyRow"]
+[node name="EnergyValue" type="Label" parent="Panel/Margin/Content/EnergyRow" unique_id=702365775]
+layout_mode = 2
 theme_override_colors/font_color = Color(0.941, 0.957, 0.973, 1)
 text = "0.0 J"
 horizontal_alignment = 2
 
-[node name="ForceRow" type="HBoxContainer" parent="Panel/Margin/Content"]
+[node name="ForceRow" type="HBoxContainer" parent="Panel/Margin/Content" unique_id=1834974669]
+layout_mode = 2
 
-[node name="ForceLabel" type="Label" parent="Panel/Margin/Content/ForceRow"]
+[node name="ForceLabel" type="Label" parent="Panel/Margin/Content/ForceRow" unique_id=1011459162]
+layout_mode = 2
 size_flags_horizontal = 3
 theme_override_colors/font_color = Color(0.663, 0.729, 0.784, 1)
 text = "Maks. sila"
 
-[node name="ForceValue" type="Label" parent="Panel/Margin/Content/ForceRow"]
+[node name="ForceValue" type="Label" parent="Panel/Margin/Content/ForceRow" unique_id=688558352]
+layout_mode = 2
 theme_override_colors/font_color = Color(0.941, 0.957, 0.973, 1)
 text = "300 N"
 horizontal_alignment = 2
 
-[node name="StatusHeading" type="Label" parent="Panel/Margin/Content"]
+[node name="StatusHeading" type="Label" parent="Panel/Margin/Content" unique_id=42936959]
+layout_mode = 2
 theme_override_colors/font_color = Color(0.663, 0.729, 0.784, 1)
 text = "Ostatnie dzialanie"
 
-[node name="StatusValue" type="Label" parent="Panel/Margin/Content"]
-custom_minimum_size = Vector2(0, 72)
+[node name="StatusValue" type="Label" parent="Panel/Margin/Content" unique_id=1195826550]
+custom_minimum_size = Vector2(0, 50)
+layout_mode = 2
 size_flags_vertical = 3
 theme_override_colors/font_color = Color(0.941, 0.957, 0.973, 1)
 text = "Poruszaj sie strzalkami lub WASD."
 autowrap_mode = 3
 
-[node name="ResetButton" type="Button" parent="Panel/Margin/Content"]
-custom_minimum_size = Vector2(0, 38)
+[node name="ResetButton" type="Button" parent="Panel/Margin/Content" unique_id=719840237]
+custom_minimum_size = Vector2(0, 34)
+layout_mode = 2
 focus_mode = 0
 text = "Resetuj poziom"
 
-[node name="VictoryOverlay" type="Control" parent="."]
+[node name="AiSection" type="VBoxContainer" parent="Panel/Margin/Content" unique_id=1619822899]
+layout_mode = 2
+theme_override_constants/separation = 5
+
+[node name="AiHeading" type="Label" parent="Panel/Margin/Content/AiSection" unique_id=1964045247]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.957, 0.827, 0.369, 1)
+theme_override_font_sizes/font_size = 14
+text = "MODEL AI"
+horizontal_alignment = 1
+
+[node name="CostSelector" type="OptionButton" parent="Panel/Margin/Content/AiSection" unique_id=66840799]
+custom_minimum_size = Vector2(0, 32)
+layout_mode = 2
+focus_mode = 0
+
+[node name="AiButtons" type="HBoxContainer" parent="Panel/Margin/Content/AiSection" unique_id=831743035]
+layout_mode = 2
+theme_override_constants/separation = 5
+
+[node name="SolveButton" type="Button" parent="Panel/Margin/Content/AiSection/AiButtons" unique_id=1182950777]
+custom_minimum_size = Vector2(0, 34)
+layout_mode = 2
+size_flags_horizontal = 3
+focus_mode = 0
+theme_override_font_sizes/font_size = 12
+text = "Rozwiąż AI"
+
+[node name="StopButton" type="Button" parent="Panel/Margin/Content/AiSection/AiButtons" unique_id=1244016818]
+custom_minimum_size = Vector2(0, 34)
+layout_mode = 2
+size_flags_horizontal = 3
+focus_mode = 0
+theme_override_font_sizes/font_size = 12
+disabled = true
+text = "Zatrzymaj AI"
+
+[node name="AiStatusValue" type="Label" parent="Panel/Margin/Content/AiSection" unique_id=1316132178]
+custom_minimum_size = Vector2(0, 48)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.941, 0.957, 0.973, 1)
+theme_override_font_sizes/font_size = 13
+text = "Gotowe do planowania."
+autowrap_mode = 3
+
+[node name="AiStatsValue" type="Label" parent="Panel/Margin/Content/AiSection" unique_id=1270312988]
+custom_minimum_size = Vector2(0, 72)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.663, 0.729, 0.784, 1)
+theme_override_font_sizes/font_size = 12
+text = "Brak wyniku wyszukiwania."
+autowrap_mode = 3
+
+[node name="VictoryOverlay" type="Control" parent="." unique_id=262298338]
 visible = false
 layout_mode = 3
 anchors_preset = 15
@@ -121,9 +192,8 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-mouse_filter = 0
 
-[node name="Dim" type="ColorRect" parent="VictoryOverlay"]
+[node name="Dim" type="ColorRect" parent="VictoryOverlay" unique_id=1075912663]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -132,7 +202,7 @@ grow_horizontal = 2
 grow_vertical = 2
 color = Color(0.035, 0.067, 0.098, 0.78)
 
-[node name="Center" type="CenterContainer" parent="VictoryOverlay"]
+[node name="Center" type="CenterContainer" parent="VictoryOverlay" unique_id=2050360299]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -140,63 +210,63 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="VictoryPanel" type="PanelContainer" parent="VictoryOverlay/Center"]
+[node name="VictoryPanel" type="PanelContainer" parent="VictoryOverlay/Center" unique_id=1275430924]
 custom_minimum_size = Vector2(420, 320)
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_victory")
 
-[node name="Margin" type="MarginContainer" parent="VictoryOverlay/Center/VictoryPanel"]
+[node name="Margin" type="MarginContainer" parent="VictoryOverlay/Center/VictoryPanel" unique_id=2137045790]
 layout_mode = 2
 theme_override_constants/margin_left = 28
 theme_override_constants/margin_top = 24
 theme_override_constants/margin_right = 28
 theme_override_constants/margin_bottom = 24
 
-[node name="Content" type="VBoxContainer" parent="VictoryOverlay/Center/VictoryPanel/Margin"]
+[node name="Content" type="VBoxContainer" parent="VictoryOverlay/Center/VictoryPanel/Margin" unique_id=678713920]
 layout_mode = 2
 theme_override_constants/separation = 12
 
-[node name="Decoration" type="Label" parent="VictoryOverlay/Center/VictoryPanel/Margin/Content"]
+[node name="Decoration" type="Label" parent="VictoryOverlay/Center/VictoryPanel/Margin/Content" unique_id=29363093]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.957, 0.827, 0.369, 1)
 theme_override_font_sizes/font_size = 42
 text = "★"
 horizontal_alignment = 1
 
-[node name="VictoryTitle" type="Label" parent="VictoryOverlay/Center/VictoryPanel/Margin/Content"]
+[node name="VictoryTitle" type="Label" parent="VictoryOverlay/Center/VictoryPanel/Margin/Content" unique_id=735078715]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.941, 0.957, 0.973, 1)
 theme_override_font_sizes/font_size = 25
 text = "POZIOM UKOŃCZONY!"
 horizontal_alignment = 1
 
-[node name="MovesValue" type="Label" parent="VictoryOverlay/Center/VictoryPanel/Margin/Content"]
+[node name="MovesValue" type="Label" parent="VictoryOverlay/Center/VictoryPanel/Margin/Content" unique_id=1711487533]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.663, 0.729, 0.784, 1)
 theme_override_font_sizes/font_size = 18
 text = "Ruchy: 0"
 horizontal_alignment = 1
 
-[node name="EnergyValue" type="Label" parent="VictoryOverlay/Center/VictoryPanel/Margin/Content"]
+[node name="EnergyValue" type="Label" parent="VictoryOverlay/Center/VictoryPanel/Margin/Content" unique_id=532277495]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.663, 0.729, 0.784, 1)
 theme_override_font_sizes/font_size = 18
 text = "Energia: 0.0 J"
 horizontal_alignment = 1
 
-[node name="Buttons" type="HBoxContainer" parent="VictoryOverlay/Center/VictoryPanel/Margin/Content"]
+[node name="Buttons" type="HBoxContainer" parent="VictoryOverlay/Center/VictoryPanel/Margin/Content" unique_id=1599859333]
 layout_mode = 2
 size_flags_vertical = 3
-alignment = 1
 theme_override_constants/separation = 12
+alignment = 1
 
-[node name="ReplayButton" type="Button" parent="VictoryOverlay/Center/VictoryPanel/Margin/Content/Buttons"]
+[node name="ReplayButton" type="Button" parent="VictoryOverlay/Center/VictoryPanel/Margin/Content/Buttons" unique_id=1260687743]
 custom_minimum_size = Vector2(160, 40)
 layout_mode = 2
 focus_mode = 0
 text = "Zagraj ponownie"
 
-[node name="CloseButton" type="Button" parent="VictoryOverlay/Center/VictoryPanel/Margin/Content/Buttons"]
+[node name="CloseButton" type="Button" parent="VictoryOverlay/Center/VictoryPanel/Margin/Content/Buttons" unique_id=938385470]
 custom_minimum_size = Vector2(120, 40)
 layout_mode = 2
 focus_mode = 0
