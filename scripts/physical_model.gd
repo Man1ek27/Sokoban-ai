@@ -28,13 +28,10 @@ func starting_force(box_mass: float, terrain_tile: String) -> float:
 func can_start_push(box_mass: float, terrain_tile: String) -> bool:
 	return robot_force >= starting_force(box_mass, terrain_tile)
 
-## Work over one tile; friction is sampled at the starting tile.
 func walking_energy(position: Vector2i, level: LevelData) -> float:
 	var terrain := terrain_for(level.tile_at(position))
 	return ROBOT_MASS * GRAVITY * float(terrain["kinetic_friction"]) * TILE_SIZE_METERS
 
-## Shared transition for manual play and AI. Does not mutate the input state.
-## Successful results contain the final logical state and the animation path.
 func move(state: BoardState, direction: Vector2i, level: LevelData) -> Dictionary:
 	if direction not in [Vector2i.UP, Vector2i.DOWN, Vector2i.LEFT, Vector2i.RIGHT]:
 		return {"success": false, "reason": "Nieprawidlowy kierunek ruchu."}
@@ -80,8 +77,7 @@ func push_box(
 
 	var path: Array[Vector2i] = [destination]
 	var current_terrain: Dictionary = terrain_for(level.tile_at(destination))
-	# The launch energy is supplied once by the robot; sliding dissipates it
-	# through friction / impact, without charging the same energy again.
+
 	var kinetic_energy := 0.0
 	if float(current_terrain["kinetic_friction"]) < SLIPPERY_FRICTION_THRESHOLD:
 		kinetic_energy = maxf(0.0, robot_force - required_force) * TILE_SIZE_METERS

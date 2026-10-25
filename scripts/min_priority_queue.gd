@@ -1,7 +1,7 @@
 class_name MinPriorityQueue
 extends RefCounted
 
-## Binary min-heap. Equal priorities are popped in insertion order.
+## Binary min-heap
 var _heap: Array[Dictionary] = []
 var _sequence := 0
 
@@ -21,7 +21,6 @@ func push(value: Variant, priority: float) -> void:
 		index = parent
 	_heap[index] = entry
 
-## Caller must check is_empty() before popping.
 func pop() -> Variant:
 	var value: Variant = _heap[0]["value"]
 	var last: Dictionary = _heap.pop_back()

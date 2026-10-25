@@ -8,10 +8,6 @@ const DIRECTIONS := [Vector2i.UP, Vector2i.DOWN, Vector2i.LEFT, Vector2i.RIGHT]
 
 enum CostMode { STEPS, ENERGY }
 
-## Synchronous search, independent of the scene tree.
-## heuristic(state, level) must return a finite nonnegative cost estimate
-## in the chosen cost units. Admissibility is required for optimality.
-## Default: Manhattan scaled for sliding and the chosen cost units.
 func solve(
 		level: LevelData,
 		initial_state: BoardState = null,
