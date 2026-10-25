@@ -1,18 +1,14 @@
 class_name SokobanHeuristics
 extends RefCounted
 
-## Geometric distance: each box uses its nearest goal, ignoring walls,
-## other boxes and goal exclusivity. This relaxation cannot overestimate
-## the minimum total box travel measured in tiles.
+## Manhattan distance heuristic
 static func manhattan(state: BoardState, level: LevelData) -> float:
 	var distance := 0.0
 	for box in state.boxes:
 		distance += _nearest_goal_distance(box["position"], level)
 	return distance
 
-## Create once per search. Convert distance to a lower bound on pushes,
-## then optionally to joules using the minimum possible robot step work.
-## Plain tile distance is NOT admissible in action units when ice exists.
+### Manhattan distance heuristic, scaled for sliding and the chosen cost units
 static func manhattan_for(level: LevelData, energy_cost: bool = false) -> Callable:
 	var physics := PhysicalModel.new(level.robot_force)
 	var max_span := maxi(1, level.tiles.size() - 1)
@@ -32,8 +28,6 @@ static func manhattan_for(level: LevelData, energy_cost: bool = false) -> Callab
 	var max_push_distance := max_span if has_slippery_terrain else 1
 	var cost_per_push := 1.0
 	if energy_cost:
-		# Every push includes at least this robot work. Box friction and
-		# launch energy are nonnegative, so ignoring them is a lower bound.
 		cost_per_push = PhysicalModel.ROBOT_MASS * PhysicalModel.GRAVITY \
 			* (min_friction if is_finite(min_friction) else 0.0) * PhysicalModel.TILE_SIZE_METERS
 	return func(state: BoardState, board: LevelData) -> float:

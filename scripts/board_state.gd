@@ -29,7 +29,6 @@ func box_at(position: Vector2i) -> int:
 			return index
 	return -1
 
-## Compatible with PhysicalModel.push_box; exclude the box being pushed.
 func box_positions(excluded_index: int = -1) -> Dictionary:
 	var positions := {}
 	for index in boxes.size():
