@@ -25,16 +25,25 @@ var selected_level_index := 0
 var is_completed := false
 var is_animating := false
 var pending_victory := false
+var ai_plan: Array[Vector2i] = []
+var ai_action_index := 0
+var ai_playing := false
+var ai_planning := false
+var ai_generation := 0
 
 func _ready() -> void:
 	hud.reset_requested.connect(_reset_level)
 	hud.level_selected.connect(_select_level)
+	hud.ai_solve_requested.connect(_start_ai)
+	hud.ai_stop_requested.connect(_stop_ai)
 	_load_level()
 	queue_redraw()
 
 func _load_level() -> void:
+	_cancel_ai()
 	_cancel_animations()
 	hud.hide_victory()
+	hud.clear_ai_result()
 	level = LevelData.from_file(LEVEL_PATHS[selected_level_index])
 	physics = PhysicalModel.new(level.robot_force)
 	player_position = level.player_start
@@ -66,6 +75,73 @@ func _reset_level() -> void:
 	_load_level()
 	queue_redraw()
 
+func _cancel_ai() -> void:
+	ai_generation += 1
+	ai_planning = false
+	ai_playing = false
+	ai_plan.clear()
+	ai_action_index = 0
+	hud.set_ai_playback(false)
+
+func _stop_ai() -> void:
+	if not ai_playing:
+		return
+	_cancel_ai()
+	hud.set_ai_status("Odtwarzanie zatrzymane.")
+
+func _start_ai(cost_mode: int) -> void:
+	if ai_planning or ai_playing or is_animating:
+		return
+	if is_completed:
+		hud.set_ai_status("Poziom jest już ukończony.")
+		return
+	_cancel_ai()
+	ai_planning = true
+	var run_generation := ai_generation
+	hud.clear_ai_result()
+	hud.set_ai_status("Planowanie...")
+	# Let the status reach the viewport before synchronous search blocks this thread.
+	await get_tree().process_frame
+	if run_generation != ai_generation:
+		return
+	var initial_state := BoardState.new(player_position, boxes)
+	var result: Dictionary = AStarSolver.new().solve(
+		level, initial_state, cost_mode, Callable(), 100000, 30000
+	)
+	if run_generation != ai_generation:
+		return
+	ai_planning = false
+	hud.show_ai_result(result, cost_mode)
+	if not bool(result["success"]):
+		return
+	ai_plan.assign(result["actions"])
+	ai_action_index = 0
+	if ai_plan.is_empty():
+		hud.set_ai_status("Plan ukończony: plansza jest już rozwiązana.")
+		return
+	ai_playing = true
+	hud.set_ai_playback(true)
+	hud.set_ai_status("Odtwarzanie planu: 0/%d" % ai_plan.size())
+	_play_next_ai_action()
+
+func _play_next_ai_action() -> void:
+	if not ai_playing or is_animating:
+		return
+	if ai_action_index >= ai_plan.size():
+		_cancel_ai()
+		if not is_completed:
+			hud.set_ai_status("Niespójność odtwarzania: plan zakończony, ale poziom nie jest rozwiązany.")
+		return
+	var direction := ai_plan[ai_action_index]
+	if not _try_move(direction):
+		var failed_action_number := ai_action_index + 1
+		var failure_reason := status
+		_cancel_ai()
+		hud.set_ai_status("Odtwarzanie przerwane: ruch %d nie powiódł się (%s)." % [failed_action_number, failure_reason])
+		return
+	ai_action_index += 1
+	hud.set_ai_status("Odtwarzanie planu: %d/%d" % [ai_action_index, ai_plan.size()])
+
 func _update_hud() -> void:
 	hud.update_state(moves, energy, physics.robot_force, status)
 
@@ -86,11 +162,13 @@ func _unhandled_key_input(event: InputEvent) -> void:
 			_reset_level()
 			return
 	if direction != Vector2i.ZERO:
+		if ai_planning or ai_playing:
+			return
 		_try_move(direction)
 
-func _try_move(direction: Vector2i) -> void:
+func _try_move(direction: Vector2i) -> bool:
 	if is_completed or is_animating:
-		return
+		return false
 	var result := physics.move(BoardState.new(player_position, boxes), direction, level)
 	if bool(result["success"]):
 		var next_state: BoardState = result["state"]
@@ -110,6 +188,7 @@ func _try_move(direction: Vector2i) -> void:
 		status = str(result["reason"])
 	_update_hud()
 	queue_redraw()
+	return bool(result["success"])
 
 func _animate_player() -> void:
 	is_animating = true
@@ -153,6 +232,12 @@ func _finish_animation() -> void:
 		_update_hud()
 		hud.show_victory(moves, energy)
 	queue_redraw()
+	if ai_playing:
+		if is_completed:
+			_cancel_ai()
+			hud.set_ai_status("Plan wykonany. Poziom ukończony!")
+		else:
+			call_deferred("_play_next_ai_action")
 
 func _is_level_solved() -> bool:
 	if boxes.is_empty() or level.goals.is_empty() or boxes.size() != level.goals.size():
