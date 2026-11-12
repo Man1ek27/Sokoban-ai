@@ -1,0 +1,13 @@
+{
+	"name": "Lodowisko",
+	"description": "Skrzynia pchnięta na lód sunie, dopóki nie trafi na szorstkie podłoże albo przeszkodę.",
+	"robot_force": 300.0,
+	"map": [
+		"############",
+		"#....#.....#",
+		"#.B..IIIIG.#",
+		"#.B..#.....#",
+		"#P...#..G..#",
+		"############"
+	]
+}

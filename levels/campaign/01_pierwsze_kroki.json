@@ -1,0 +1,12 @@
+{
+	"name": "Pierwsze kroki",
+	"description": "Wepchnij skrzynię na cel. Skrzynię można tylko pchać, nie ciągnąć.",
+	"robot_force": 300.0,
+	"map": [
+		"#########",
+		"#......G#",
+		"#.P.B...#",
+		"#.......#",
+		"#########"
+	]
+}

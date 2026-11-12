@@ -2,7 +2,7 @@
 
 ## Wygląd i układ
 
-Bazowa rozdzielczość wynosi 1200 × 800. Plansza i legenda terenu są po lewej, panel sterowania po prawej. Pełny wynik wyszukiwania mieści się bez przewijania przy bazowym rozmiarze; `ScrollContainer` pozostaje zabezpieczeniem dla większych treści. Mniejsze poziomy są wyśrodkowane w obszarze planszy. Skala logiczna i rozmiar kafelków (56 px) pozostają zachowane.
+Bazowa rozdzielczość wynosi 1200 × 800. Plansza i legenda terenu są po lewej, panel sterowania po prawej. Pełny wynik wyszukiwania mieści się bez przewijania przy bazowym rozmiarze; `ScrollContainer` pozostaje zabezpieczeniem dla większych treści. Plansza jest wyśrodkowana w obszarze planszy; kafelki mają 56 px, a poziomy większe niż ten obszar są proporcjonalnie zmniejszane (`draw_set_transform`). Legenda pokazuje tylko elementy obecne na poziomie i przechodzi do dwóch rzędów, gdy się nie mieści.
 
 Wspólny motyw kontrolek znajduje się w `ui/game_theme.tres`. Plansza, robot, skrzynie i wzory terenu nadal są rysowane proceduralnie w `game.gd`, bez tekstur i dodatkowych zależności. Cele mają turkusowe oznaczenia, a skrzynia stojąca na celu — turkusową obwódkę. Masa skrzyni jest wyśrodkowana na osobnej etykiecie.
 

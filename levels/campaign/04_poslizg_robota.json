@@ -1,0 +1,15 @@
+{
+	"name": "Poślizg robota",
+	"description": "Na lodzie koła robota tracą przyczepność: robot nie zahamuje, a stojąc na lodzie nie ruszy skrzyni z drewna.",
+	"robot_force": 300.0,
+	"map": [
+		"###########",
+		"#P.IIIIIG.#",
+		"#..IIIII..#",
+		"#..II#II..#",
+		"#.BIIIII..#",
+		"#..IIIIIB.#",
+		"#.GIIIII..#",
+		"###########"
+	]
+}

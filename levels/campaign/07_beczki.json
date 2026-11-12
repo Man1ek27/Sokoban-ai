@@ -1,0 +1,14 @@
+{
+	"name": "Beczki",
+	"description": "Beczka toczy się po jednym pchnięciu aż do przeszkody albo piasku.",
+	"robot_force": 300.0,
+	"map": [
+		"###########",
+		"#P....#...#",
+		"#.O......##",
+		"#....#..G.#",
+		"#.O...SG#.#",
+		"#.........#",
+		"###########"
+	]
+}

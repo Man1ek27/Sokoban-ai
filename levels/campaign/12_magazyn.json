@@ -1,0 +1,33 @@
+{
+	"name": "Wielki magazyn",
+	"description": "Wszystko naraz: lód, piasek, uskok, beczka, ciężkie skrzynie i drzwi. Kolejność ruchów ma znaczenie.",
+	"robot_force": 300.0,
+	"map": [
+		"#############",
+		"#.P...#.....#",
+		"#..IIGD..S..#",
+		"#..II.#.BS..#",
+		"#...B.#..v..#",
+		"#O._..#.III.#",
+		"#.....#.B.GG#",
+		"#############"
+	],
+	"boxes": [
+		{
+			"index": 0,
+			"mass": 45.0
+		},
+		{
+			"index": 1,
+			"mass": 60.0
+		},
+		{
+			"index": 2,
+			"mass": 30.0
+		},
+		{
+			"index": 3,
+			"mass": 35.0
+		}
+	]
+}

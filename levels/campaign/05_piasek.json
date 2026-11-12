@@ -1,0 +1,14 @@
+{
+	"name": "Ruchome piaski",
+	"description": "Piasek zatrzymuje rozpędzoną skrzynię. Ale skrzynię z piasku ruszysz tylko stojąc na twardym gruncie.",
+	"robot_force": 300.0,
+	"map": [
+		"###########",
+		"#P..#.....#",
+		"#.B.IIIS..#",
+		"#...#...G.#",
+		"#.B.IIIIS.#",
+		"#...#...G.#",
+		"###########"
+	]
+}

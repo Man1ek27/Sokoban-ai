@@ -1,0 +1,14 @@
+{
+	"name": "Porządki w magazynie",
+	"description": "Dwie skrzynie, dwa cele. Uważaj na narożniki — stamtąd skrzyni nie wyciągniesz.",
+	"robot_force": 300.0,
+	"map": [
+		"########",
+		"#..#...#",
+		"#.B..B.#",
+		"#..##..#",
+		"#G....G#",
+		"#...P..#",
+		"########"
+	]
+}
