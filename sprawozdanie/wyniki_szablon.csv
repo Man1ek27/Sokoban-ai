@@ -1,0 +1,1 @@
+level,level_name,heuristic,cost_mode,run_id,robot_force_n,state_limit,time_limit_ms,status,elapsed_ms,expanded_states,discovered_states,moves,pushes,energy_j,replay_ok,code_sha256

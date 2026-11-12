@@ -28,11 +28,11 @@ func _run() -> void:
 	_check(hud.get_node("Panel").position.x >= 664.0, "HUD must leave the demo board unobstructed")
 	_check(content.size.y <= scroll.size.y, "HUD must fit vertically without scrolling")
 	print("HUD scroll width=%.1f content width=%.1f" % [scroll.size.x, content.size.x])
-	_check(hud.heuristic_selector.is_item_disabled(1) and hud.heuristic_selector.is_item_disabled(2), "h2/h3 must be disabled")
+	_check(not hud.heuristic_selector.is_item_disabled(1) and not hud.heuristic_selector.is_item_disabled(2), "h2/h3 must be selectable")
 	hud.cost_selector.select(AStarSolver.CostMode.ENERGY)
 	hud.cost_selector.item_selected.emit(AStarSolver.CostMode.ENERGY)
 	_check(hud.heuristic_selector.get_selected_id() == GameHud.Heuristic.H1, "Cost mode must not change heuristic")
-	_check(not game._heuristic_for(GameHud.Heuristic.H2, AStarSolver.CostMode.STEPS).is_valid(), "h2 must not fall back to h1")
+	_check(not game._heuristic_for(-1, AStarSolver.CostMode.STEPS).is_valid(), "Unknown heuristics must not fall back to h1")
 
 	_check(game.selected_level_index == 0 and game.campaign.size() >= 10, "Fresh progress must start at campaign level 1")
 	game._select_level(1)
@@ -127,9 +127,16 @@ func _run() -> void:
 	await process_frame
 	await process_frame
 	_check(not game.ai_playing and not game.ai_planning and game.moves == 0 and hud.force_input.editable, "Reset before synchronous solve must invalidate pending run")
-	await game._start_ai(AStarSolver.CostMode.ENERGY)
-	await create_timer(0.35).timeout
-	_check(game.is_completed and not game.ai_playing and game.ai_preview.is_empty(), "Uninterrupted ENERGY playback must complete and clear preview")
+	for heuristic in [GameHud.Heuristic.H2, GameHud.Heuristic.H3]:
+		game._reset_level()
+		hud.heuristic_selector.select(heuristic)
+		hud.heuristic_selector.item_selected.emit(heuristic)
+		hud.solve_button.pressed.emit()
+		await process_frame
+		await process_frame
+		await create_timer(0.35).timeout
+		_check(game.is_completed and not game.ai_playing and game.ai_preview.is_empty(), "Selected heuristic %d must complete ENERGY playback" % heuristic)
+		_check(hud.ai_config_value.text.begins_with(hud.heuristic_name(heuristic)), "HUD must report the chosen heuristic")
 
 	# Completing campaign level 1 unlocks level 2 and persists the progress.
 	game._select_level(0)

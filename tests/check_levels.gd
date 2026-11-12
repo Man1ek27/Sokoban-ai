@@ -1,7 +1,8 @@
 extends SceneTree
 
 ## Verifies that every campaign level is solvable with the shared physics model.
-## Run: Godot --headless --path . --script res://tests/check_levels.gd [-- <level index or -1> [plan|trace|energy]]
+## Run: Godot --headless --path . --script res://tests/check_levels.gd
+##      [-- <level index or -1> [steps|plan|trace|energy] [h1|h2|h3|dijkstra]]
 const Campaign = preload("res://scripts/campaign.gd")
 
 func _initialize() -> void:
@@ -10,19 +11,26 @@ func _initialize() -> void:
 func _run() -> void:
 	var args := OS.get_cmdline_user_args()
 	var only := int(args[0]) if args.size() >= 1 and args[0].is_valid_int() else -1
+	var mode := AStarSolver.CostMode.ENERGY if args.size() >= 2 and args[1] == "energy" else AStarSolver.CostMode.STEPS
+	var heuristic_name := args[2] if args.size() >= 3 else "h1"
 	var paths := Campaign.level_paths()
 	var failures := 0
 	for index in paths.size():
 		if only >= 0 and index != only:
 			continue
 		var level := LevelData.from_file(paths[index])
-		var mode := AStarSolver.CostMode.ENERGY if args.size() >= 2 and args[1] == "energy" else AStarSolver.CostMode.STEPS
-		var result := AStarSolver.new().solve(level, null, mode, Callable(), 3000000, 300000)
+		var heuristic := SokobanHeuristics.for_name(heuristic_name, level, mode == AStarSolver.CostMode.ENERGY)
+		if not heuristic.is_valid():
+			push_error("Nieznana heurystyka: %s" % heuristic_name)
+			quit(2)
+			return
+		var result := AStarSolver.new().solve(level, null, mode, heuristic, 3000000, 300000)
 		var pushes := _count_pushes(level, result["actions"])
-		print("%2d %-26s %-10s moves=%3d pushes=%3d expanded=%8d time=%8.0f ms  game_ai=%s" % [
+		print("%2d %-26s %-10s moves=%3d pushes=%3d expanded=%8d time=%8.0f ms  game_ai=%s  discovered=%d energy=%.2f" % [
 			index + 1, level.name, result["status"], result["moves"], pushes,
 			result["expanded_states"], result["elapsed_ms"],
-			"ok" if result["success"] and int(result["expanded_states"]) <= 100000 and float(result["elapsed_ms"]) < 30000.0 else "limit"
+			"ok" if result["success"] and int(result["expanded_states"]) <= 100000 and float(result["elapsed_ms"]) < 30000.0 else "limit",
+			result["discovered_states"], result["energy"]
 		])
 		if not result["success"]:
 			failures += 1

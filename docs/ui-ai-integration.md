@@ -8,7 +8,7 @@ Wspólny motyw kontrolek znajduje się w `ui/game_theme.tres`. Plansza, robot, s
 
 ## Parametry i cykl życia
 
-- Heurystyka i kryterium kosztu są niezależnymi ustawieniami. Obecnie dostępna jest wyłącznie h1. Zmiana ustawienia usuwa poprzedni wynik.
+- Heurystyka i kryterium kosztu są niezależnymi ustawieniami. Dostępne są h1, h2 i h3. Zmiana ustawienia usuwa poprzedni wynik.
 - Fmax jest podawane w N, z krokiem 0,1 N. Zmiana aktualizuje jednocześnie `level.robot_force` i `physics.robot_force`, usuwa plan i wynik wyszukiwania. Zachowuje bieżącą pozycję obiektów, liczbę ruchów i energię już wykonanych ruchów.
 - Reset (R, przycisk resetu, ponowna gra) i wybór poziomu ponownie odczytują JSON: przywracają początkowy stan, Fmax i zerują liczniki. Nie zapisujemy zmian do JSON. Wybór heurystyki i kryterium kosztu pozostaje zachowany.
 - Parametry i przycisk rozwiązywania są blokowane podczas planowania, odtwarzania oraz animacji. Reset i wybór poziomu pozostają dostępne podczas animacji/odtwarzania.
@@ -23,19 +23,14 @@ Niebieskie ciągłe strzałki przedstawiają robota, fioletowe przerywane strza�
 
 Statystyki czasu, stanów, długości i energii pochodzą bezpośrednio z wyniku `solve()`. Dla nieudanego wyszukiwania długość i energia rozwiązania mają znak „—”, ponieważ zerowe pola solvera nie oznaczają rozwiązania o zerowym koszcie. Wynik wyszukiwania jest zachowany po zatrzymaniu/wykonaniu AI, a osobny komunikat opisuje stan odtwarzania.
 
-## Podłączenie h2/h3 przez Radzia
+## Wybór heurystyki
 
 Kontrakt `AStarSolver.solve()` pozostaje bez zmian. Czwarty argument to `Callable(state: BoardState, level: LevelData) -> float`. Heurystyka powinna zwracać skończoną nieujemną wartość, bez mutowania stanu. Jej skala musi odpowiadać STEPS albo ENERGY i uwzględniać poślizg, jeśli ma zachować gwarancję optymalności.
 
-Proponowana forma, zgodna z obecną `manhattan_for`, to fabryki w `SokobanHeuristics`:
-
-```gdscript
-# Propozycja przyszłego interfejsu, bez implementacji na tym branchu:
-static func weighted_for(level: LevelData, energy_cost: bool = false) -> Callable
-static func terrain_aware_for(level: LevelData, energy_cost: bool = false) -> Callable
-```
-
-Po dostarczeniu implementacji należy dodać przypadki `GameHud.Heuristic.H2/H3` w `game.gd::_heuristic_for()` i odblokować odpowiednie pozycje w `GameHud._ready()`. Fabryki są wywoływane dla każdego nowego wyszukiwania, dzięki czemu otrzymują aktualny Fmax. Nie należy zastępować brakującej implementacji pustym `Callable`: solver potraktowałby go jako prośbę o domyślną h1. Obecny adapter odrzuca niedostępne heurystyki przed wywołaniem solvera.
+Adapter `game.gd::_heuristic_for()` wywołuje odpowiednio `manhattan_for`,
+`weighted_for` lub `terrain_aware_for`. Fabryki są wywoływane dla każdego
+wyszukiwania, dzięki czemu otrzymują aktualny Fmax. Adapter odrzuca nieznany
+identyfikator przed wywołaniem solvera.
 
 Sygnał HUD ma postać `ai_solve_requested(cost_mode: int, heuristic_id: int)`. Inne sygnały integracyjne: `robot_force_changed(force: float)` i `ai_settings_changed`.
 
@@ -54,7 +49,7 @@ Test integracyjny sprawdza prawdziwe przejścia, animacje i wyniki solvera, w ty
 Do sprawdzenia wizualnego w edytorze:
 
 1. Uruchomić oba poziomy; sprawdzić WASD, strzałki, ściany, pchanie i naliczanie energii.
-2. Sprawdzić osobne selektory heurystyki/kosztu, blokadę h2/h3 i przewijanie HUD.
+2. Sprawdzić osobne selektory heurystyki i kosztu oraz wybór h1, h2 i h3.
 3. W „Test zwycięstwa” ustawić Fmax na 0 N; pchanie i solver powinny nie móc rozwiązać poziomu. R przywraca 300 N.
 4. W „Demo fizyki” uruchomić AI, obserwować niebieską trasę robota i fioletowe odcinki poślizgu, ich skracanie oraz czytelność obiektów.
 5. Zatrzymać AI podczas ruchu/pchania, potem ruszyć ręcznie. Parametry odblokowują się po zakończeniu animacji.

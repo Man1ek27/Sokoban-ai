@@ -93,11 +93,11 @@ func doors_open(level: LevelData, masses: Dictionary) -> bool:
 
 ## Returns "" when a body moving in `direction` may enter `position`,
 ## otherwise a human-readable reason. Occupancy by boxes is checked separately.
-func entry_block_reason(position: Vector2i, direction: Vector2i, level: LevelData, masses: Dictionary) -> String:
+func entry_block_reason(position: Vector2i, direction: Vector2i, level: LevelData, masses: Dictionary, assume_doors_open: bool = false) -> String:
 	var tile := level.tile_at(position)
 	if tile == LevelData.WALL:
 		return "Ściana blokuje przejście."
-	if tile == LevelData.DOOR and not doors_open(level, masses):
+	if tile == LevelData.DOOR and not assume_doors_open and not doors_open(level, masses):
 		return "Drzwi są zamknięte: płyty potrzebują nacisku %.0f kg." % level.plate_mass
 	var ramp := level.ramp_direction(position)
 	if ramp != Vector2i.ZERO and ramp != direction:
@@ -153,7 +153,8 @@ func walk(state: BoardState, direction: Vector2i, level: LevelData) -> Dictionar
 		"terrain": terrain_name
 	}
 
-func push_box(state: BoardState, index: int, direction: Vector2i, level: LevelData) -> Dictionary:
+## The heuristic can relax door constraints while reusing the same push physics.
+func push_box(state: BoardState, index: int, direction: Vector2i, level: LevelData, assume_doors_open: bool = false) -> Dictionary:
 	var box: Dictionary = state.boxes[index]
 	var box_position: Vector2i = box["position"]
 	var box_mass := float(box["mass"])
@@ -177,7 +178,7 @@ func push_box(state: BoardState, index: int, direction: Vector2i, level: LevelDa
 	var destination := box_position + direction
 	if masses.has(destination):
 		return {"success": false, "reason": "Przeszkoda blokuje skrzynię."}
-	var reason := entry_block_reason(destination, direction, level, masses)
+	var reason := entry_block_reason(destination, direction, level, masses, assume_doors_open)
 	if reason != "":
 		return {"success": false, "reason": reason}
 
@@ -195,7 +196,7 @@ func push_box(state: BoardState, index: int, direction: Vector2i, level: LevelDa
 	# Moving centre to centre costs half a tile of friction on each surface.
 	while kinetic_energy > 0.0 and current_mu < SLIPPERY_FRICTION_THRESHOLD:
 		var next_position: Vector2i = path.back() + direction
-		if masses.has(next_position) or entry_block_reason(next_position, direction, level, masses) != "":
+		if masses.has(next_position) or entry_block_reason(next_position, direction, level, masses, assume_doors_open) != "":
 			break
 		var next_mu := float(resistance(kind, level.tile_at(next_position))["kinetic"])
 		var step_cost := box_mass * GRAVITY * (current_mu + next_mu) * 0.5 * TILE_SIZE_METERS
