@@ -10,11 +10,11 @@ func _initialize() -> void:
 func _run() -> void:
 	var args := OS.get_cmdline_user_args()
 	if args.size() == 1 and args[0] == "--help":
-		print("solve_cli.gd -- <level.json> [steps|energy] [max_expanded=100000] [time_limit_ms=5000]")
+		print("solve_cli.gd -- <level.json> [steps|energy] [max_expanded=100000] [time_limit_ms=5000] [h1|h2|h3|dijkstra]")
 		quit(0)
 		return
-	if args.is_empty() or args.size() > 4:
-		_fail("Podaj plik poziomu oraz opcjonalnie: steps|energy, limit stanow, limit ms.")
+	if args.is_empty() or args.size() > 5:
+		_fail("Podaj plik poziomu oraz opcjonalnie: steps|energy, limit stanow, limit ms, h1|h2|h3|dijkstra.")
 		return
 	var mode_name := args[1] if args.size() >= 2 else "steps"
 	if mode_name not in ["steps", "energy"]:
@@ -42,7 +42,12 @@ func _run() -> void:
 		return
 	var level := Level.from_dictionary(data)
 	var mode := Solver.CostMode.ENERGY if mode_name == "energy" else Solver.CostMode.STEPS
-	var result := Solver.new().solve(level, null, mode, Callable(), max_expanded, time_limit_ms)
+	var heuristic_name := args[4] if args.size() >= 5 else "h1"
+	var heuristic := SokobanHeuristics.for_name(heuristic_name, level, mode == Solver.CostMode.ENERGY)
+	if not heuristic.is_valid():
+		_fail("Heurystyka musi miec wartosc h1, h2, h3 albo dijkstra.")
+		return
+	var result := Solver.new().solve(level, null, mode, heuristic, max_expanded, time_limit_ms)
 	# Vector2i and INF do not have standard JSON representations.
 	var actions: Array = []
 	for direction in result["actions"]:
@@ -52,6 +57,7 @@ func _run() -> void:
 		result["cost"] = null
 	result["cost_mode"] = mode_name
 	result["cost_unit"] = "J" if mode_name == "energy" else "moves"
+	result["heuristic"] = heuristic_name
 	print(JSON.stringify(result))
 	var exit_code := 0 if result["success"] else 1
 	if result["status"] in ["invalid_input", "invalid_heuristic"]:

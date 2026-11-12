@@ -44,9 +44,6 @@ func _ready() -> void:
 	heuristic_selector.add_item("h1 — Manhattan", Heuristic.H1)
 	heuristic_selector.add_item("h2 — masa i tarcie", Heuristic.H2)
 	heuristic_selector.add_item("h3 — Terrain-Aware", Heuristic.H3)
-	for index in [1, 2]:
-		heuristic_selector.set_item_disabled(index, true)
-		heuristic_selector.set_item_tooltip(index, "Niedostępna: oczekuje na integrację heurystyki.")
 	heuristic_selector.select(0)
 	heuristic_selector.item_selected.connect(_on_ai_setting_selected)
 	cost_selector.item_selected.connect(_on_ai_setting_selected)

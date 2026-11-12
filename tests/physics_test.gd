@@ -30,6 +30,7 @@ func _run() -> void:
 	_plates_and_doors()
 	_ramps()
 	_solver_rules()
+	_heuristic_bounds()
 	_campaign_progress()
 	print("Physics: %d checks, %d failures" % [checks, failures])
 	quit(0 if failures == 0 else 1)
@@ -141,6 +142,41 @@ func _solver_rules() -> void:
 	var barrel_level := _level(["######", "#PO..#", "#...G#", "######"])
 	_check(SokobanHeuristics.manhattan_for(barrel_level).call(BoardState.from_level(barrel_level), barrel_level) <= 2.0, "Barrels must not make the heuristic overestimate")
 	_check(heuristic.is_valid(), "Heuristic factory must return a callable")
+
+func _heuristic_bounds() -> void:
+	var ice := _level(["##########", "#PB..IIG.#", "##########"])
+	# The extra crate stops the barrel exactly on the goal before the end of its glide.
+	var blocked_glide := _level(["##########", "#PO..GB..#", "##########"])
+	var plate := _level(["#########", "#P.B.D.G#", "#..._...#", "#########"])
+	plate.boxes.append({"position": Vector2i(4, 2), "mass": 40.0, "kind": LevelData.CRATE_KIND})
+	var solver := AStarSolver.new()
+	for level: LevelData in [ice, blocked_glide, plate]:
+		var start := BoardState.from_level(level)
+		for mode in [AStarSolver.CostMode.STEPS, AStarSolver.CostMode.ENERGY]:
+			var energy_cost: bool = mode == AStarSolver.CostMode.ENERGY
+			var baseline := solver.solve(level, start, mode, SokobanHeuristics.for_name("dijkstra", level))
+			_check(baseline["success"], "Dijkstra must solve each heuristic fixture")
+			for name in ["h2", "h3"]:
+				var heuristic := SokobanHeuristics.for_name(name, level, energy_cost)
+				var estimate := float(heuristic.call(start, level))
+				var cost := float(baseline["cost"])
+				var result := solver.solve(level, start, mode, heuristic)
+				_check(estimate > 0.0 and (estimate <= cost or is_equal_approx(estimate, cost)), "%s must give a positive lower bound on the fixture" % name)
+				_check(result["success"] and is_equal_approx(float(result["cost"]), cost), "%s must preserve the Dijkstra optimum" % name)
+
+	var ice_start := BoardState.from_level(ice)
+	var h2 := SokobanHeuristics.weighted_for(ice)
+	var h3 := SokobanHeuristics.terrain_aware_for(ice)
+	_check(h3.call(ice_start, ice) > h2.call(ice_start, ice), "h3 must account for the pushes needed to reach the ice")
+	var light := _level(["######", "#PBG.#", "######"])
+	var light_state := BoardState.from_level(light)
+	var heavy_state := light_state.copy()
+	heavy_state.boxes[0]["mass"] = 45.0
+	var weighted_energy := SokobanHeuristics.weighted_for(light, true)
+	_check(weighted_energy.call(heavy_state, light) > weighted_energy.call(light_state, light), "h2 ENERGY must account for mass in the current state")
+	light.robot_force = 0.0
+	var no_force := solver.solve(light, null, AStarSolver.CostMode.ENERGY, SokobanHeuristics.terrain_aware_for(light, true))
+	_check(no_force["status"] == "no_solution", "h3 must return a finite estimate when the relaxed graph cannot reach a goal")
 
 func _campaign_progress() -> void:
 	var path := "user://physics_test_progress.cfg"

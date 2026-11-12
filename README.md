@@ -1,6 +1,6 @@
 # Sokoban AI
 
-Projekt gry Sokoban 2D w Godot Engine 4.7.2 (GDScript). Kampania liczy 12 poziomów o rosnącej trudności, odblokowywanych po kolei. Można grać ręcznie albo uruchomić z HUD solver A*, który wybiera plan o najmniejszej liczbie ruchów lub najniższym koszcie energii. Gra i solver korzystają z tego samego modelu fizycznego: przyczepności kół robota, tarcia, poślizgu, toczenia beczek, płyt naciskowych z drzwiami i jednokierunkowych uskoków. Planer można też uruchomić bez okna gry. Fizyczne heurystyki A* i eksperymenty porównawcze pozostają do zrobienia.
+Projekt gry Sokoban 2D w Godot Engine 4.7.2 (GDScript). Kampania liczy 12 poziomów o rosnącej trudności, odblokowywanych po kolei. Można grać ręcznie albo uruchomić z HUD solver A*, który wybiera plan o najmniejszej liczbie ruchów lub najniższym koszcie energii. Gra i solver korzystają z tego samego modelu fizycznego: przyczepności kół robota, tarcia, poślizgu, toczenia beczek, płyt naciskowych z drzwiami i jednokierunkowych uskoków. W grze i w trybie bez okna dostępne są trzy heurystyki.
 
 ## Uruchomienie
 
@@ -18,6 +18,7 @@ Do samej gry nie są potrzebne zewnętrzne grafiki: plansza, gracz i skrzynie s�
 | `N` lub **Następny poziom** | Przejście do kolejnego poziomu po ukończeniu bieżącego |
 | **Poziom** | Wybór jednego z odblokowanych poziomów kampanii |
 | **Najmniej ruchów** / **Najmniej energii** | Wybór kosztu planowania A*: `STEPS` / `ENERGY` |
+| **Heurystyka** | Wybór h1 Manhattan, h2 masa i tarcie lub h3 Terrain-Aware |
 | **Rozwiąż AI** | Wyznaczenie planu od aktualnego stanu planszy i rozpoczęcie odtwarzania |
 | **Zatrzymaj AI** | Zatrzymanie kolejnych akcji planu; trwająca animacja kończy się bez przerywania |
 
@@ -137,7 +138,7 @@ scripts/physical_model.gd    przyczepność, pchanie, poślizg, płyty, drzwi, u
 scripts/board_state.gd       reprezentacja stanu dla AI
 scripts/min_priority_queue.gd kolejka priorytetowa A*
 scripts/astar_solver.gd      solver A*
-scripts/sokoban_heuristics.gd heurystyka Manhattan
+scripts/sokoban_heuristics.gd heurystyki h1, h2 i h3
 scripts/solve_cli.gd         uruchamianie solvera bez okna gry
 docs/ai_interface.md         kontrakt integracji AI z interfejsem
 levels/campaign.json         kolejność poziomów kampanii
@@ -242,7 +243,32 @@ Heurystyka jest dopuszczalna dla obecnego modelu ruchu. Przykładowo na
 98,1 J, a rozwiązanie to jeden ruch w górę o rzeczywistym koszcie
 183,9375 J. Przy poślizgu przez trzy pola odległość geometryczna 3 może
 odpowiadać jednemu pchnięciu. Skalowanie na planszach z lodem jest celowo
-zachowawcze; osobne heurystyki fizyczne pozostają do zaimplementowania.
+zachowawcze.
+
+### Heurystyki fizyczne h2 i h3
+
+**h2 — masa i tarcie** (`weighted_for`) szacuje liczbę pchnięć z odległości
+Manhattan. Osobno wyznacza górną granicę przesunięcia skrzyni i beczki podczas
+jednego pchnięcia. W trybie energii mnoży liczbę pchnięć przez sumę najmniejszej
+pracy robota i najmniejszej pracy potrzebnej do przemieszczenia danego ciała
+o jedno pole. Praca ciała zależy od jego masy oraz najniższego tarcia lub oporu
+toczenia na planszy.
+
+**h3 — Terrain-Aware** (`terrain_aware_for`) buduje graf pchnięć osobno
+dla każdej kombinacji rodzaju i masy ciała. Zachowuje ściany, kierunki
+uskoków, ograniczenia siły i reguły poślizgu. Przyjmuje, że drzwi są otwarte,
+a robot może znaleźć się po dowolnej dostępnej stronie ciała. Każde pole
+na trasie pchnięcia jest dopuszczalnym miejscem zatrzymania, ponieważ w grze
+przeszkoda może skrócić ślizg. Koszt krawędzi wynosi jeden ruch albo energię
+pchnięcia z modelu fizycznego. Odległości do najbliższego celu powstają przez
+wielopunktowe wyszukiwanie Dijkstry od celów po odwróconych krawędziach.
+
+Obie heurystyki sumują najniższe oszacowania dla tylu ciał, ile jest celów.
+Pominięcie kosztu dojścia robota i dopuszczenie wspólnego celu dla kilku ciał
+zachowują dolne oszacowanie. Jeśli w grafie h3 za mało ciał może dotrzeć do
+jakiegokolwiek celu, solver otrzymuje skończoną wartość z h2.
+
+### Wynik wyszukiwania
 
 Wynik zawiera `status`, `success`, `actions`, `moves`, `cost`, `energy`,
 `elapsed_ms`, `expanded_states` i `discovered_states`. Możliwe statusy:
@@ -258,14 +284,15 @@ Wywołanie blokuje wątek do zakończenia. Gra przekazuje własny limit czasu
 Z katalogu projektu (zastąp `godot` ścieżką do programu Godot, jeśli nie ma go w `PATH`):
 
 ```text
-godot --headless --path . --script res://scripts/solve_cli.gd -- res://levels/win_test.json energy 100000 5000
+godot --headless --path . --script res://scripts/solve_cli.gd -- res://levels/win_test.json energy 100000 5000 h3
 ```
 
-Argumenty po `--` to: ścieżka do poziomu, opcjonalny tryb `steps` lub `energy`,
-limit rozwinięć i limit czasu w ms. Domyślne wartości to `steps`, `100000`
-i `5000`. Wynik jest wypisywany jako JSON (po ewentualnych komunikatach
-startowych Godota); akcje mają postać kierunków
-`[dx, dy]`. CLI zwraca kod `0` dla rozwiązania, `1` dla braku rozwiązania
+Po ścieżce poziomu można podać tryb `steps` lub `energy`, limit rozwinięć,
+limit czasu w ms i heurystykę `h1`, `h2`, `h3` lub `dijkstra` (heurystyka zerowa).
+Domyślne wartości to `steps`, `100000`, `5000` i `h1`.
+Wynik JSON zawiera nazwę heurystyki, a akcje mają postać kierunków
+`[dx, dy]`. Godot może wcześniej wypisać komunikaty startowe.
+CLI zwraca kod `0` dla rozwiązania, `1` dla braku rozwiązania
 lub osiągnięcia limitu i `2` dla nieprawidłowego wejścia lub heurystyki.
 `demo_level.json` wymaga przy obecnej fizyce więcej niż 100 000 rozwinięć,
 np. `1000000` stanów i `120000` ms.
@@ -277,18 +304,17 @@ Wszystkie polecenia uruchamia się z katalogu projektu (zastąp `godot` ścieżk
 ```text
 godot --headless --path . --script res://tests/physics_test.gd
 godot --headless --path . --script res://tests/game_integration_test.gd
-godot --headless --path . --script res://tests/check_levels.gd
+godot --headless --path . --script res://tests/check_levels.gd -- -1 energy h3
 ```
 
 - `physics_test.gd` — przyczepność, poślizg robota i ciał, piasek, beczki, płyty i drzwi, uskoki, reguły solvera oraz zapis postępu kampanii.
 - `game_integration_test.gd` — sterowanie, HUD, odtwarzanie planu AI, ukończenie poziomu 1 i odblokowanie poziomu 2. Używa osobnego pliku `user://test_progress.cfg`, więc nie zmienia postępu gracza.
-- `check_levels.gd` — rozwiązuje każdy poziom kampanii (limit 3 mln stanów) i wypisuje długość planu, liczbę pchnięć, rozwinięte stany oraz to, czy mieszczą się one w limitach AI w grze. Opcjonalne argumenty: `-- <indeks|-1> [plan|trace|energy]`; `trace` rysuje planszę po każdym pchnięciu i poślizgu.
+- `check_levels.gd` — rozwiązuje poziomy kampanii (limit 3 mln stanów) i wypisuje długość planu, pchnięcia, stany rozwinięte i odkryte, energię, czas oraz wynik porównania z limitami gry. Opcjonalne argumenty to `-- <indeks|-1> [steps|plan|trace|energy] [h1|h2|h3|dijkstra]`. Indeksy zaczynają się od zera, a `-1` wybiera całą kampanię. Opcja `trace` rysuje planszę po każdym pchnięciu i poślizgu.
 
 ## Dalszy rozwój
 
 Kolejne elementy, które można dodać do projektu:
 
-- heurystyki fizyczne dla A* (w trybie ENERGY poziom 12 wymaga ok. 99 000 z 100 000 dopuszczalnych rozwinięć),
 - wykrywanie deadlocków bardziej złożonych niż narożniki,
 - panel parametrów fizycznych,
 - porównanie strategii AI i ustawień fizyki w eksperymentach,

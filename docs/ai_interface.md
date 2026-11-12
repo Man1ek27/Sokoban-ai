@@ -104,8 +104,8 @@ odrzuca wejście w trakcie animacji. Reset lub zmiana parametrów usuwa plan.
 postępu ani nie obsługuje anulowania w trakcie wyszukiwania. Limity dotyczą
 pętli wyszukiwania, nie są przerwaniem wykonywanej właśnie operacji.
 Do responsywnego UI potrzebny będzie osobny wątek z niezależną kopią danych;
-wynik i animacje należy obsługiwać w głównym wątku. Na tym etapie nie ma
-przycisków sterowania AI ani odtwarzacza planu w interfejsie.
+wynik i animacje należy obsługiwać w głównym wątku. Przycisk zatrzymania AI
+w HUD dotyczy odtwarzania planu.
 
 ## Uruchomienie bez interfejsu graficznego
 
@@ -115,22 +115,24 @@ Z katalogu projektu (zastąp `godot` ścieżką do swojego pliku wykonywalnego):
 godot --headless --path . --script res://scripts/solve_cli.gd -- res://levels/win_test.json energy 100000 5000
 ```
 
-Argumenty po `--`: plik poziomu, opcjonalny tryb `steps`/`energy`, opcjonalny
-limit rozwinięć i limit czasu w ms. Domyślne wartości: `steps`, `100000`, `5000`.
+Po ścieżce poziomu można podać tryb `steps` lub `energy`, limit rozwinięć,
+limit czasu w ms i heurystykę `h1`, `h2`, `h3` lub `dijkstra`.
+Domyślne wartości to `steps`, `100000`, `5000` i `h1` (Manhattan).
 Masy, siła i układ planszy pochodzą z pliku poziomu. CLI planuje od jego
-stanu początkowego i używa heurystyki Manhattan.
+stanu początkowego.
 
 CLI nie ładuje sceny gry ani HUD. Wypisuje jeden obiekt JSON z wynikiem;
 komunikaty startowe Godota i autoloadów mogą pojawić się przed JSON-em.
 W JSON kierunki mają postać `[dx, dy]`, a brak skończonego kosztu to `null`.
-Dodatkowe pola to `cost_mode` (`steps`/`energy`) i `cost_unit` (`moves`/`J`).
+Dodatkowe pola to `cost_mode` (`steps`/`energy`), `cost_unit` (`moves`/`J`)
+i `heuristic`.
 Błędy argumentów lub odczytu pliku zwracają skrócony obiekt z `success`,
 `status: "invalid_input"` i `message`.
 
 Przykładowy wynik dla `win_test.json` w trybie energii (czas zależy od uruchomienia):
 
 ```json
-{"actions":[[0,-1]],"cost":183.9375,"cost_mode":"energy","cost_unit":"J","discovered_states":5,"elapsed_ms":0.5,"energy":183.9375,"expanded_states":1,"moves":1,"status":"solved","success":true}
+{"actions":[[0,-1]],"cost":183.9375,"cost_mode":"energy","cost_unit":"J","discovered_states":5,"elapsed_ms":0.5,"energy":183.9375,"expanded_states":1,"heuristic":"h1","moves":1,"status":"solved","success":true}
 ```
 
 Kody wyjścia: `0` rozwiązanie, `1` brak rozwiązania lub osiągnięty limit,

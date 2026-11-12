@@ -169,7 +169,7 @@ func _start_ai(cost_mode: int, heuristic_id: int = GameHud.Heuristic.H1) -> void
 		return
 	var heuristic := _heuristic_for(heuristic_id, cost_mode)
 	if not heuristic.is_valid():
-		hud.set_ai_status("Wybrana heurystyka nie jest jeszcze dostępna.")
+		hud.set_ai_status("Nieznana heurystyka.")
 		return
 	_cancel_ai()
 	ai_planning = true
@@ -207,10 +207,14 @@ func _start_ai(cost_mode: int, heuristic_id: int = GameHud.Heuristic.H1) -> void
 	_play_next_ai_action()
 
 func _heuristic_for(heuristic_id: int, cost_mode: int) -> Callable:
-	# Future h2/h3 factories must return Callable(state: BoardState, level: LevelData).
+	var energy_cost := cost_mode == AStarSolver.CostMode.ENERGY
 	match heuristic_id:
 		GameHud.Heuristic.H1:
-			return SokobanHeuristics.manhattan_for(level, cost_mode == AStarSolver.CostMode.ENERGY)
+			return SokobanHeuristics.manhattan_for(level, energy_cost)
+		GameHud.Heuristic.H2:
+			return SokobanHeuristics.weighted_for(level, energy_cost)
+		GameHud.Heuristic.H3:
+			return SokobanHeuristics.terrain_aware_for(level, energy_cost)
 	return Callable()
 
 func _build_ai_preview(initial_state: BoardState) -> bool:
