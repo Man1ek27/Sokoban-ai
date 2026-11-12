@@ -3,6 +3,7 @@ extends CanvasLayer
 
 signal reset_requested
 signal level_selected(index: int)
+signal next_level_requested
 signal ai_solve_requested(cost_mode: int, heuristic_id: int)
 signal ai_stop_requested
 signal robot_force_changed(force: float)
@@ -26,6 +27,8 @@ enum Heuristic { H1, H2, H3 }
 @onready var victory_overlay: Control = $VictoryOverlay
 @onready var victory_moves_value: Label = $VictoryOverlay/Center/VictoryPanel/Margin/Content/MovesValue
 @onready var victory_energy_value: Label = $VictoryOverlay/Center/VictoryPanel/Margin/Content/EnergyValue
+@onready var victory_progress_value: Label = $VictoryOverlay/Center/VictoryPanel/Margin/Content/ProgressValue
+@onready var next_button: Button = $VictoryOverlay/Center/VictoryPanel/Margin/Content/Buttons/NextButton
 @onready var replay_button: Button = $VictoryOverlay/Center/VictoryPanel/Margin/Content/Buttons/ReplayButton
 @onready var close_button: Button = $VictoryOverlay/Center/VictoryPanel/Margin/Content/Buttons/CloseButton
 
@@ -33,9 +36,6 @@ var victory_tween: Tween
 var parameters_locked := false
 
 func _ready() -> void:
-	level_selector.add_item("Demo fizyki", 0)
-	level_selector.add_item("Test zwycięstwa", 1)
-	level_selector.select(0)
 	level_selector.item_selected.connect(_on_level_selected)
 	reset_button.pressed.connect(_on_reset_pressed)
 	cost_selector.add_item("STEPS — ruchy", AStarSolver.CostMode.STEPS)
@@ -57,10 +57,26 @@ func _ready() -> void:
 	clear_ai_result()
 	replay_button.pressed.connect(_on_replay_pressed)
 	close_button.pressed.connect(hide_victory)
+	next_button.pressed.connect(_on_next_pressed)
 	hide_victory()
+
+## Rebuilds the level list; locked levels stay visible but cannot be chosen.
+func set_levels(labels: Array[String], unlocked: Array[bool], selected: int) -> void:
+	level_selector.clear()
+	for index in labels.size():
+		level_selector.add_item(labels[index], index)
+		level_selector.set_item_disabled(index, not unlocked[index])
+		if not unlocked[index]:
+			level_selector.set_item_tooltip(index, "Ukończ poprzedni poziom, aby odblokować.")
+	if selected >= 0 and selected < labels.size():
+		level_selector.select(selected)
 
 func _on_level_selected(index: int) -> void:
 	level_selected.emit(level_selector.get_item_id(index))
+
+func _on_next_pressed() -> void:
+	hide_victory()
+	next_level_requested.emit()
 
 func _on_reset_pressed() -> void:
 	reset_requested.emit()
@@ -142,11 +158,14 @@ func _on_replay_pressed() -> void:
 	hide_victory()
 	reset_requested.emit()
 
-func show_victory(move_count: int, total_energy: float) -> void:
+func show_victory(move_count: int, total_energy: float, progress_text: String = "", has_next: bool = false) -> void:
 	if victory_tween != null and victory_tween.is_valid():
 		victory_tween.kill()
 	victory_moves_value.text = "Ruchy: %d" % move_count
 	victory_energy_value.text = "Energia: %.1f J" % total_energy
+	victory_progress_value.text = progress_text
+	victory_progress_value.visible = progress_text != ""
+	next_button.visible = has_next
 	victory_overlay.modulate.a = 0.0
 	victory_overlay.visible = true
 	victory_tween = create_tween()

@@ -1,0 +1,33 @@
+{
+	"name": "Lodowe beczki",
+	"description": "Beczki toczą się po drewnie, skrzynie suną po lodzie, a piasek łapie jedne i drugie. Zaplanuj, gdzie każde ciało się zatrzyma.",
+	"robot_force": 300.0,
+	"map": [
+		"###########",
+		"#..O.GG...#",
+		"#..IIII..G#",
+		"#..IIII.S.#",
+		"#...OB#.BG#",
+		"#.S...#...#",
+		"#.......P.#",
+		"###########"
+	],
+	"boxes": [
+		{
+			"index": 0,
+			"mass": 30.0
+		},
+		{
+			"index": 1,
+			"mass": 30.0
+		},
+		{
+			"index": 2,
+			"mass": 35.0
+		},
+		{
+			"index": 3,
+			"mass": 45.0
+		}
+	]
+}

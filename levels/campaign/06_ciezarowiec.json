@@ -1,0 +1,24 @@
+{
+	"name": "Ciężarowiec",
+	"description": "Ciężkie skrzynie wymagają pełnej siły — pchaj je stojąc na pewnym gruncie, nie na piasku.",
+	"robot_force": 300.0,
+	"map": [
+		"##########",
+		"#P...SS..#",
+		"#.B..SS.G#",
+		"#....##..#",
+		"#.B......#",
+		"#..SSS..G#",
+		"##########"
+	],
+	"boxes": [
+		{
+			"index": 0,
+			"mass": 75.0
+		},
+		{
+			"index": 1,
+			"mass": 60.0
+		}
+	]
+}

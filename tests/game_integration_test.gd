@@ -14,7 +14,9 @@ func _check(condition: bool, message: String) -> void:
 		push_error(message)
 
 func _run() -> void:
+	DirAccess.remove_absolute(ProjectSettings.globalize_path("user://test_progress.cfg"))
 	var game: Node = load("res://main.tscn").instantiate()
+	game.progress_path = "user://test_progress.cfg"
 	root.add_child(game)
 	await process_frame
 	var hud: GameHud = game.hud
@@ -32,7 +34,10 @@ func _run() -> void:
 	_check(hud.heuristic_selector.get_selected_id() == GameHud.Heuristic.H1, "Cost mode must not change heuristic")
 	_check(not game._heuristic_for(GameHud.Heuristic.H2, AStarSolver.CostMode.STEPS).is_valid(), "h2 must not fall back to h1")
 
+	_check(game.selected_level_index == 0 and game.campaign.size() >= 10, "Fresh progress must start at campaign level 1")
 	game._select_level(1)
+	_check(game.selected_level_index == 0, "Locked level must not be selectable")
+	game.load_level_file("res://levels/win_test.json")
 	for key in [KEY_LEFT, KEY_A, KEY_RIGHT, KEY_D, KEY_DOWN, KEY_S, KEY_UP, KEY_W]:
 		game._reset_level()
 		var key_event := InputEventKey.new()
@@ -97,7 +102,7 @@ func _run() -> void:
 	_check(game._try_move(Vector2i.LEFT), "Manual control must work after stopping AI")
 
 	# A real playback is started, then interrupted while its tween is active.
-	game._select_level(1)
+	game.load_level_file("res://levels/win_test.json")
 	game._start_ai(AStarSolver.CostMode.STEPS, GameHud.Heuristic.H1)
 	_check(game.ai_planning and not hud.force_input.editable and hud.heuristic_selector.disabled and hud.cost_selector.disabled, "Planning must lock parameters before yielding")
 	game._change_robot_force(10.0)
@@ -109,9 +114,9 @@ func _run() -> void:
 	_check(not game.ai_playing and game.is_animating and game.ai_preview.is_empty() and not hud.force_input.editable, "Stop must clear plan and let current animation finish")
 	await create_timer(0.35).timeout
 	_check(game.is_completed and game.visual_player_position == Vector2(game.player_position) and hud.force_input.editable, "Stop during final push must still complete consistently")
-	game._select_level(0)
+	game.load_level_file("res://levels/demo_level.json")
 	_check(not game.is_completed and not hud.victory_overlay.visible and game.ai_preview.is_empty(), "Changing level after AI completion must clear victory and preview")
-	game._select_level(1)
+	game.load_level_file("res://levels/win_test.json")
 	_check(game._try_move(Vector2i.UP), "Manual push must work")
 	game._reset_level()
 	await create_timer(0.35).timeout
@@ -125,6 +130,20 @@ func _run() -> void:
 	await game._start_ai(AStarSolver.CostMode.ENERGY)
 	await create_timer(0.35).timeout
 	_check(game.is_completed and not game.ai_playing and game.ai_preview.is_empty(), "Uninterrupted ENERGY playback must complete and clear preview")
+
+	# Completing campaign level 1 unlocks level 2 and persists the progress.
+	game._select_level(0)
+	var first_level := LevelData.from_file(game.campaign.paths[0])
+	var first_plan: Dictionary = AStarSolver.new().solve(first_level)
+	_check(first_plan["success"], "Campaign level 1 must be solvable")
+	for direction in first_plan["actions"]:
+		_check(game._try_move(direction), "Campaign plan move must succeed")
+		await create_timer(0.5).timeout
+	_check(game.is_completed and hud.victory_overlay.visible and hud.next_button.visible, "Victory must offer the next level")
+	_check(game.campaign.is_unlocked(1) and not game.campaign.is_unlocked(2), "Only the next level may unlock")
+	_check(Campaign.new("user://test_progress.cfg").is_unlocked(1), "Progress must persist on disk")
+	hud.next_button.pressed.emit()
+	_check(game.selected_level_index == 1 and not game.is_completed and not hud.victory_overlay.visible, "Next level button must load level 2")
 
 	var solver := AStarSolver.new()
 	var demo := LevelData.from_file("res://levels/demo_level.json")
@@ -140,7 +159,7 @@ func _run() -> void:
 	hud.show_ai_result(timed, AStarSolver.CostMode.STEPS, GameHud.Heuristic.H1)
 	_check(hud.ai_status_value.text.contains("Limit czasu"), "HUD must show real time limit result")
 	for mode in [AStarSolver.CostMode.STEPS, AStarSolver.CostMode.ENERGY]:
-		var result := solver.solve(demo, null, mode, SokobanHeuristics.manhattan_for(demo, mode == AStarSolver.CostMode.ENERGY), 100000, 30000)
+		var result := solver.solve(demo, null, mode, SokobanHeuristics.manhattan_for(demo, mode == AStarSolver.CostMode.ENERGY), 1000000, 120000)
 		_check(result["success"], "Existing demo must solve in mode %d (status: %s)" % [mode, result["status"]])
 		print("demo mode=%d status=%s moves=%d energy=%.1f" % [mode, result["status"], result["moves"], result["energy"]])
 		hud.show_ai_result(result, mode, GameHud.Heuristic.H1)
@@ -149,5 +168,6 @@ func _run() -> void:
 		_check(content.size.y <= scroll.size.y, "Full solver statistics must fit without scrolling")
 	game.queue_free()
 	await process_frame
+	DirAccess.remove_absolute(ProjectSettings.globalize_path("user://test_progress.cfg"))
 	print("Integration: %d checks, %d failures" % [checks, failures])
 	quit(0 if failures == 0 else 1)

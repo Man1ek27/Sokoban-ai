@@ -1,0 +1,14 @@
+{
+	"name": "Uskoki",
+	"description": "Na uskok wjedziesz tylko zgodnie ze strzałką — przemyśl kolejność ruchów.",
+	"robot_force": 300.0,
+	"map": [
+		"##########",
+		"#P..#....#",
+		"#.B.>..B.#",
+		"#...#.v..#",
+		"##^##.#..#",
+		"#G......G#",
+		"##########"
+	]
+}

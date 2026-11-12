@@ -19,9 +19,11 @@ var result: Dictionary = AStarSolver.new().solve(
 Współrzędne są indeksami kafelków: `(0, 0)` w lewym górnym rogu,
 `x` rośnie w prawo, `y` w dół. Nie przekazujemy pozycji w pikselach.
 Stan zawiera `player_position: Vector2i` i `boxes: Array[Dictionary]`.
-Każda skrzynia ma `position: Vector2i` oraz dodatnią, skończoną `mass: float` w kg.
-Skrzynie nie mogą się nakładać ani stać na ścianach, robot musi być na wolnym
-polu. Wymagana jest równa, niezerowa liczba skrzyń i celów.
+Każde ciało ma `position: Vector2i`, dodatnią, skończoną `mass: float` w kg
+oraz `kind: String` (`"crate"` — skrzynia, `"barrel"` — beczka).
+Ciała nie mogą się nakładać ani stać na ścianach, robot musi być na wolnym
+polu. Wymagany jest co najmniej jeden cel i co najmniej tyle ciał, ile celów;
+nadmiarowe ciała (np. obciążniki płyt) mogą pozostać poza celami.
 
 Parametr siły to `level.robot_force` w N. UI ustawia go przed planowaniem
 i tworzy dla odtwarzania `PhysicalModel.new(level.robot_force)`.
@@ -128,7 +130,7 @@ Błędy argumentów lub odczytu pliku zwracają skrócony obiekt z `success`,
 Przykładowy wynik dla `win_test.json` w trybie energii (czas zależy od uruchomienia):
 
 ```json
-{"status":"solved","success":true,"actions":[[0,-1]],"moves":1,"cost":134.8875,"energy":134.8875,"elapsed_ms":0.3,"expanded_states":4,"discovered_states":11,"cost_mode":"energy","cost_unit":"J"}
+{"actions":[[0,-1]],"cost":183.9375,"cost_mode":"energy","cost_unit":"J","discovered_states":5,"elapsed_ms":0.5,"energy":183.9375,"expanded_states":1,"moves":1,"status":"solved","success":true}
 ```
 
 Kody wyjścia: `0` rozwiązanie, `1` brak rozwiązania lub osiągnięty limit,

@@ -145,7 +145,7 @@ allow_greater = true
 step = 0.1
 value = 300.0
 suffix = " N"
-tooltip_text = "Fmax [N]. Reset i zmiana poziomu przywracają wartość z JSON."
+tooltip_text = "Fmax [N] silnika. Siłę pchania ogranicza też przyczepność kół: min(Fmax, μ_chwytu · m_robota · g). Reset i zmiana poziomu przywracają wartość z JSON."
 horizontal_alignment = 2
 
 [node name="StatusHeading" type="Label" parent="Panel/Margin/Scroll/Content" unique_id=42936959]
@@ -309,7 +309,7 @@ grow_horizontal = 2
 grow_vertical = 2
 
 [node name="VictoryPanel" type="PanelContainer" parent="VictoryOverlay/Center" unique_id=1275430924]
-custom_minimum_size = Vector2(420, 320)
+custom_minimum_size = Vector2(560, 340)
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_victory")
 
@@ -352,11 +352,25 @@ theme_override_font_sizes/font_size = 18
 text = "Energia: 0.0 J"
 horizontal_alignment = 1
 
+[node name="ProgressValue" type="Label" parent="VictoryOverlay/Center/VictoryPanel/Margin/Content"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.4, 0.88, 0.8, 1)
+theme_override_font_sizes/font_size = 15
+text = ""
+horizontal_alignment = 1
+autowrap_mode = 3
+
 [node name="Buttons" type="HBoxContainer" parent="VictoryOverlay/Center/VictoryPanel/Margin/Content" unique_id=1599859333]
 layout_mode = 2
 size_flags_vertical = 3
 theme_override_constants/separation = 12
 alignment = 1
+
+[node name="NextButton" type="Button" parent="VictoryOverlay/Center/VictoryPanel/Margin/Content/Buttons"]
+custom_minimum_size = Vector2(170, 40)
+layout_mode = 2
+focus_mode = 0
+text = "Następny poziom"
 
 [node name="ReplayButton" type="Button" parent="VictoryOverlay/Center/VictoryPanel/Margin/Content/Buttons" unique_id=1260687743]
 custom_minimum_size = Vector2(160, 40)

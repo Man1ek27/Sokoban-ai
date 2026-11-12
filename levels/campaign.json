@@ -1,0 +1,16 @@
+{
+	"levels": [
+		"res://levels/campaign/01_pierwsze_kroki.json",
+		"res://levels/campaign/02_porzadki.json",
+		"res://levels/campaign/03_lodowisko.json",
+		"res://levels/campaign/04_poslizg_robota.json",
+		"res://levels/campaign/05_piasek.json",
+		"res://levels/campaign/06_ciezarowiec.json",
+		"res://levels/campaign/07_beczki.json",
+		"res://levels/campaign/08_uskoki.json",
+		"res://levels/campaign/09_plyta.json",
+		"res://levels/campaign/10_lodowe_beczki.json",
+		"res://levels/campaign/11_sluza.json",
+		"res://levels/campaign/12_magazyn.json"
+	]
+}

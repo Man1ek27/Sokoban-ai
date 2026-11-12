@@ -1,0 +1,32 @@
+{
+	"name": "Śluza",
+	"description": "Tylko jedna skrzynia jest dość ciężka, by utrzymać drzwi otwarte. Uskok przepuszcza tylko w jedną stronę.",
+	"robot_force": 300.0,
+	"map": [
+		"############",
+		"#...G#.GB..#",
+		"#.B..D.BB..#",
+		"#.#..#..v.G#",
+		"#..P.#.....#",
+		"#.._.#.>...#",
+		"############"
+	],
+	"boxes": [
+		{
+			"index": 0,
+			"mass": 35.0
+		},
+		{
+			"index": 1,
+			"mass": 45.0
+		},
+		{
+			"index": 2,
+			"mass": 35.0
+		},
+		{
+			"index": 3,
+			"mass": 35.0
+		}
+	]
+}

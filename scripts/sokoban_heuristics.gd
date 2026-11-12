@@ -1,12 +1,13 @@
 class_name SokobanHeuristics
 extends RefCounted
 
-## Manhattan distance heuristic
+## Manhattan distance heuristic. With more boxes than goals only the
+## goals.size() boxes closest to a goal are counted, which keeps it admissible.
 static func manhattan(state: BoardState, level: LevelData) -> float:
-	var distance := 0.0
+	var distances: Array[float] = []
 	for box in state.boxes:
-		distance += _nearest_goal_distance(box["position"], level)
-	return distance
+		distances.append(_nearest_goal_distance(box["position"], level))
+	return _sum_smallest(distances, level.goals.size())
 
 ### Manhattan distance heuristic, scaled for sliding and the chosen cost units
 static func manhattan_for(level: LevelData, energy_cost: bool = false) -> Callable:
@@ -25,20 +26,30 @@ static func manhattan_for(level: LevelData, energy_cost: bool = false) -> Callab
 			min_friction = minf(min_friction, friction)
 			if friction < PhysicalModel.SLIPPERY_FRICTION_THRESHOLD:
 				has_slippery_terrain = true
-	var max_push_distance := max_span if has_slippery_terrain else 1
+	# Barrels roll on ordinary floor, so one push may also move them several tiles.
+	var max_push_distance := max_span if has_slippery_terrain or level.has_sliding_bodies() else 1
 	var cost_per_push := 1.0
 	if energy_cost:
 		cost_per_push = PhysicalModel.ROBOT_MASS * PhysicalModel.GRAVITY \
 			* (min_friction if is_finite(min_friction) else 0.0) * PhysicalModel.TILE_SIZE_METERS
 	return func(state: BoardState, board: LevelData) -> float:
-		var pushes := 0.0
+		var pushes: Array[float] = []
 		for box in state.boxes:
 			var distance := _nearest_goal_distance(box["position"], board)
-			pushes += ceilf(distance / float(max_push_distance))
-		return pushes * cost_per_push
+			pushes.append(ceilf(distance / float(max_push_distance)))
+		return _sum_smallest(pushes, board.goals.size()) * cost_per_push
 
 static func _nearest_goal_distance(position: Vector2i, level: LevelData) -> float:
 	var nearest := INF
 	for goal in level.goals:
 		nearest = minf(nearest, float(absi(position.x - goal.x) + absi(position.y - goal.y)))
 	return nearest
+
+static func _sum_smallest(values: Array[float], count: int) -> float:
+	if values.size() > count:
+		values.sort()
+		values.resize(count)
+	var total := 0.0
+	for value in values:
+		total += value
+	return total

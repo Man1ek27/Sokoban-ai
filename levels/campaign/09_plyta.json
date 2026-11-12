@@ -1,0 +1,28 @@
+{
+	"name": "Płyta naciskowa",
+	"description": "Drzwi otworzy nacisk co najmniej 40 kg na płycie. Lekka skrzynia nie wystarczy.",
+	"robot_force": 300.0,
+	"map": [
+		"###########",
+		"#P...#....#",
+		"#.B..D..B.#",
+		"#..._#....#",
+		"#.B..#.GG.#",
+		"#....#....#",
+		"###########"
+	],
+	"boxes": [
+		{
+			"index": 0,
+			"mass": 35.0
+		},
+		{
+			"index": 1,
+			"mass": 35.0
+		},
+		{
+			"index": 2,
+			"mass": 45.0
+		}
+	]
+}

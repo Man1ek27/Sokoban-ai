@@ -27,6 +27,7 @@ func solve(
 	if not heuristic.is_valid():
 		heuristic = Heuristics.manhattan_for(level, cost_mode == CostMode.ENERGY)
 	var physics := PhysicalModel.new(level.robot_force)
+	var dead_squares := corner_dead_squares(level)
 	var frontier := Queue.new()
 	var start_key := start.state_key()
 	var best_g := {start_key: 0.0}
@@ -56,6 +57,8 @@ func solve(
 			if not transition["success"]:
 				continue
 			var next_state: BoardState = transition["state"]
+			if int(transition["box_index"]) >= 0 and dead_squares.has(transition["position"]) 					and is_deadlocked(next_state, level, dead_squares):
+				continue
 			var next_key := next_state.state_key()
 			var step_cost: float = 1.0 if cost_mode == CostMode.STEPS else float(transition["energy"])
 			var next_g := g + step_cost
@@ -69,11 +72,36 @@ func solve(
 			frontier.push({"state": next_state, "key": next_key, "g": next_g}, next_g + h)
 	return _result("no_solution", started, expanded, best_g.size())
 
+## Non-goal floor cells with walls on two orthogonal sides. A box resting there can
+## never be pushed again (the robot would have to stand inside a wall), whatever
+## the terrain, so such states are pruned without losing any solution.
+static func corner_dead_squares(level: LevelData) -> Dictionary:
+	var dead := {}
+	for y in level.tiles.size():
+		for x in level.tiles[y].length():
+			var position := Vector2i(x, y)
+			if level.is_wall(position) or level.goals.has(position):
+				continue
+			var vertical := level.is_wall(position + Vector2i.UP) or level.is_wall(position + Vector2i.DOWN)
+			var horizontal := level.is_wall(position + Vector2i.LEFT) or level.is_wall(position + Vector2i.RIGHT)
+			if vertical and horizontal:
+				dead[position] = true
+	return dead
+
+## True when fewer boxes than goals can still move. Extra boxes (plate weights)
+## may rest on dead squares without blocking the solution.
+static func is_deadlocked(state: BoardState, level: LevelData, dead_squares: Dictionary) -> bool:
+	var stuck := 0
+	for box in state.boxes:
+		if dead_squares.has(box["position"]):
+			stuck += 1
+	return state.boxes.size() - stuck < level.goals.size()
+
 func _estimate(state: BoardState, level: LevelData, heuristic: Callable) -> float:
 	return float(heuristic.call(state, level))
 
 func _valid_state(state: BoardState, level: LevelData) -> bool:
-	if state.boxes.is_empty() or state.boxes.size() != level.goals.size():
+	if level.goals.is_empty() or state.boxes.size() < level.goals.size():
 		return false
 	if not is_finite(level.robot_force) or level.robot_force < 0.0:
 		return false
