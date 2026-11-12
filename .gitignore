@@ -1,3 +1,13 @@
 # Godot 4+ specific ignores
 .godot/
 /android/
+
+# Generated Godot imports from benchmark CSV files
+/results/*.translation
+/results/*.csv.import
+
+# Local test logs
+/results/*.log
+
+# Local review files
+*.diff
